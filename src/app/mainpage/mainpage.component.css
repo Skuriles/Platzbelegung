@@ -1,0 +1,64 @@
+table {
+    width: 100%;
+    /* min-width: 500px; */
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type,
+td.mat-footer-cell:last-of-type {
+    padding-right: 8px;
+    cursor: pointer;
+}
+
+.cancelIcon {
+    margin-right: 20px;
+    float: left;
+}
+
+.example-button-row {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-left: 15px;
+}
+
+.example-button-row .mat-button-base {
+    margin: 8px 8px 8px 0;
+}
+
+.addbtn {
+    float: right;
+    margin-right: 15px !important;
+}
+
+.filter {
+    margin-left: 15px;
+
+}
+
+.filter mat-form-field {
+    width: 300px;
+}
+
+.weekRow {
+    background-color: rgba(0, 0, 0, .12);
+}
+
+.infoIcon {
+    float: right;
+    margin-right: 15px;
+}
+
+.infoText {
+    margin-top: 2px;
+    float: left;
+}
+
+.editCol {
+    padding-right: 0;
+}
+
+.mat-column-datum.mobileDate {
+    flex: 0;
+    width: 100px;
+    padding-left: 15px;
+}

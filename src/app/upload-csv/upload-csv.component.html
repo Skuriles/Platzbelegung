@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>CSV Daten importieren</h2>
+<mat-dialog-content class="mat-typography">
+  <mat-form-field>
+    <div>
+      <mat-toolbar>
+        <!-- Display files names -->
+        <input matInput [(ngModel)]="fileAttr" readonly name="name" />
+
+        <!-- Browse Button -->
+        <button mat-flat-button color="primary">Browse File</button>
+      </mat-toolbar>
+
+      <!-- Fetch selected filed on change -->
+      <input
+        type="file"
+        #fileInput
+        id="uploadFile"
+        (change)="uploadFileEvt($event)"
+        name="uploadFile"
+        accept=".csv"
+      />
+    </div>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button mat-flat-button color="accent" (click)="upload()" cdkFocusInitial>
+    Importieren
+  </button>
+</mat-dialog-actions>

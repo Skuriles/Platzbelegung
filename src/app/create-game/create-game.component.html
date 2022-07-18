@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>Spieltag erstellen</h2>
+<mat-dialog-content class="mat-typography">
+  <div class="login">
+    <form class="example-form">
+      <mat-form-field class="example-full-width">
+        <mat-label>Datum</mat-label>
+        <input
+          matInput
+          type="datetime-local"
+          placeholder="Datum"
+          [ngModel]="spieltag.date | date: 'yyyy-MM-ddTHH:mm'"
+          (ngModelChange)="spieltag.datum = $event"
+          name="datum"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Mannschaft</mat-label>
+        <input
+          matInput
+          placeholder="Mannschaft und Staffel"
+          [(ngModel)]="spieltag.mannschaft"
+          name="mannschaft"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Heim</mat-label>
+        <input
+          matInput
+          placeholder="Heim"
+          [(ngModel)]="spieltag.heim"
+          name="heim"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Gast</mat-label>
+        <input
+          matInput
+          placeholder="Gast"
+          [(ngModel)]="spieltag.gast"
+          name="gast"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Person</mat-label>
+        <input
+          matInput
+          placeholder="Person"
+          [(ngModel)]="spieltag.person"
+          name="person"
+        />
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button
+    mat-flat-button
+    color="accent"
+    [mat-dialog-close]="spieltag"
+    cdkFocusInitial
+  >
+    Speichern
+  </button>
+</mat-dialog-actions>

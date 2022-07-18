@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>Spieltag löschen?</h2>
+<mat-dialog-content class="mat-typography">
+  <div class="mat-body-strong">
+    Spiel: {{ spieltag.date | date: "dd-MM-yyyy HH:mm" }}<br />
+    {{ spieltag.mannschaft }} - {{ spieltag.heim }} : {{ spieltag.gast }}
+  </div>
+  <br />
+  <div>Sicher, dass dieses Spiel gelöscht werden soll?</div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button
+    mat-flat-button
+    color="warn"
+    [mat-dialog-close]="spieltag"
+    cdkFocusInitial
+  >
+    Löschen
+  </button>
+</mat-dialog-actions>

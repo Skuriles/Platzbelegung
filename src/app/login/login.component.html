@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>Bitte Benutzername und Passwort eingeben</h2>
+<mat-dialog-content class="mat-typography">
+  <div class="login">
+    <form class="example-form">
+      <mat-form-field class="example-full-width">
+        <mat-label>Name eingeben</mat-label>
+        <input
+          matInput
+          placeholder="Dein name"
+          value=""
+          [(ngModel)]="credentials.name"
+          name="name"
+        />
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          value=""
+          type="password"
+          [(ngModel)]="credentials.pw"
+          name="pw"
+        />
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button
+    mat-button
+    [mat-dialog-close]="credentials"
+    color="primary"
+    [disabled]="checkName()"
+  >
+    Weiter
+  </button>
+</mat-dialog-actions>
+<!-- <div>
+    <button mat-fab color="primary" [disabled]="checkName()" (click)="login()">
+      Starten
+    </button>
+  </div> -->
