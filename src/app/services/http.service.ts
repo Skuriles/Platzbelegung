@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { TokenData } from "../classes/tokenData";
-import { Spieltag } from "../classes/spieltag";
+import { SvdEvent } from "../classes/svdEvent";
 
 @Injectable({
   providedIn: "root",
@@ -10,7 +10,7 @@ export class HttpService {
   constructor(private http: HttpClient) {}
 
   public token: TokenData;
-//   private baseUrl = "http://localhost:65004/wptest_master/";
+  //   private baseUrl = "http://localhost:65004/wptest_master/";
   private baseUrl = "https://www.sv-deggenhausertal.de/";
   private apiPrefix = this.baseUrl + "wp-json/";
 
@@ -20,12 +20,12 @@ export class HttpService {
   }
 
   public test() {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/author/1";
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/author/1";
     return this.getRequest(nodeUrl);
   }
 
   public getUserRole(id) {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/userInfo/" + id;
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/userInfo/" + id;
     return this.postAuthRequest(nodeUrl, null);
   }
 
@@ -49,29 +49,29 @@ export class HttpService {
   }
 
   public getAllData() {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/getAll";
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/getAll";
     return this.postRequest(nodeUrl, null);
   }
 
-  public saveGame(element: Spieltag) {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/saveGame";
+  public saveEvent(element: SvdEvent) {
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/saveEvent";
     const body = { element };
     return this.postAuthRequest(nodeUrl, body);
   }
 
-  public addGame(element: Spieltag) {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/addGame";
+  public addEvent(element: SvdEvent) {
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/addEvent";
     const body = { element };
     return this.postAuthRequest(nodeUrl, body);
   }
 
-  public deleteGame(id: number) {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/deleteGame/" + id;
+  public deleteEvent(id: number) {
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/deleteEvent/" + id;
     return this.postAuthRequest(nodeUrl, null);
   }
 
   public uploadCsv(files: File[]) {
-    const nodeUrl = this.apiPrefix + "svd_sportheim/v1/uploadCsv";
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/uploadCsv";
     return this.postAuthUploadRequest(nodeUrl, files);
   }
   // default http requests

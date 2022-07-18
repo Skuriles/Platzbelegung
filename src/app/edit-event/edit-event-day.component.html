@@ -1,5 +1,6 @@
-<h2 mat-dialog-title>Spieltag erstellen</h2>
+<h2 mat-dialog-title>Event bearbeiten</h2>
 <mat-dialog-content class="mat-typography">
+  <div>Event: {{ event.name }}</div>
   <div class="login">
     <form class="example-form">
       <mat-form-field class="example-full-width">
@@ -8,36 +9,20 @@
           matInput
           type="datetime-local"
           placeholder="Datum"
-          [ngModel]="spieltag.date | date: 'yyyy-MM-ddTHH:mm'"
-          (ngModelChange)="spieltag.datum = $event"
+          [ngModel]="event.date | date: 'yyyy-MM-ddTHH:mm'"
+          (ngModelChange)="event.datum = $event"
           name="datum"
         />
       </mat-form-field>
       <mat-form-field class="example-full-width">
-        <mat-label>Mannschaft</mat-label>
+        <mat-label>Name</mat-label>
         <input
           matInput
-          placeholder="Mannschaft und Staffel"
-          [(ngModel)]="spieltag.mannschaft"
-          name="mannschaft"
-        />
-      </mat-form-field>
-      <mat-form-field class="example-full-width">
-        <mat-label>Heim</mat-label>
-        <input
-          matInput
-          placeholder="Heim"
-          [(ngModel)]="spieltag.heim"
-          name="heim"
-        />
-      </mat-form-field>
-      <mat-form-field class="example-full-width">
-        <mat-label>Gast</mat-label>
-        <input
-          matInput
-          placeholder="Gast"
-          [(ngModel)]="spieltag.gast"
-          name="gast"
+          type="text"
+          placeholder="Name"
+          [ngModel]="event.name"
+          (ngModelChange)="event.name = $event"
+          name="name"
         />
       </mat-form-field>
       <mat-form-field class="example-full-width">
@@ -45,7 +30,7 @@
         <input
           matInput
           placeholder="Person"
-          [(ngModel)]="spieltag.person"
+          [(ngModel)]="event.person"
           name="person"
         />
       </mat-form-field>
@@ -57,7 +42,7 @@
   <button
     mat-flat-button
     color="accent"
-    [mat-dialog-close]="spieltag"
+    [mat-dialog-close]="event"
     cdkFocusInitial
   >
     Speichern

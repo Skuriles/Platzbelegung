@@ -21,24 +21,24 @@ import { StartComponent } from "./app.component";
 import { LoginComponent } from "./login/login.component";
 import { HttpService } from "./services/http.service";
 import { MainpageComponent } from "./mainpage/mainpage.component";
-import { EditMatchDayComponent } from "./edit-match-day/edit-match-day.component";
+import { EditEventComponent } from "./edit-event/edit-event-day.component";
 import { LoginService } from "./services/login.service";
 import { LuxonModule } from "luxon-angular";
 import { ConfirmBoxComponent } from "./confirm-box/confirm-box.component";
-import { CreateGameComponent } from "./create-game/create-game.component";
+import { CreateEventComponent } from "./create-event/create-event.component";
 import { UploadCsvComponent } from "./upload-csv/upload-csv.component";
-import { InfoGameComponent } from "./info-game/info-game.component";
+import { InfoEventComponent } from "./info-event/info-event.component";
 
 @NgModule({
   declarations: [
     StartComponent,
     LoginComponent,
     MainpageComponent,
-    EditMatchDayComponent,
+    EditEventComponent,
     ConfirmBoxComponent,
-    CreateGameComponent,
+    CreateEventComponent,
     UploadCsvComponent,
-    InfoGameComponent,
+    InfoEventComponent,
   ],
   imports: [
     BrowserModule,

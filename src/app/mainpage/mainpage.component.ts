@@ -2,31 +2,31 @@ import { Component, NgZone, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { DateTime, Settings } from "luxon";
 import { Credentials } from "../classes/credentials";
-import { Spieltag } from "../classes/spieltag";
+import { SvdEvent } from "../classes/svdEvent";
 import { TokenData } from "../classes/tokenData";
-import { EditMatchDayComponent } from "../edit-match-day/edit-match-day.component";
+import { EditEventComponent } from "../edit-event/edit-event-day.component";
 import { LoginComponent } from "../login/login.component";
 import { HttpService } from "../services/http.service";
 import { LoginService } from "../services/login.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatTableDataSource } from "@angular/material/table";
 import { ConfirmBoxComponent } from "../confirm-box/confirm-box.component";
-import { CreateGameComponent } from "../create-game/create-game.component";
 import { UploadCsvComponent } from "../upload-csv/upload-csv.component";
 import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
-import { InfoGameComponent } from "../info-game/info-game.component";
 import { ERoles } from "../enum/roles";
+import { CreateEventComponent } from "../create-event/create-event.component";
+import { InfoEventComponent } from "../info-event/info-event.component";
 
 @Component({
   selector: "app-mainpage",
   templateUrl: "./mainpage.component.html",
-  styleUrls: ["./mainpage.component.css"],
+  styleUrls: ["./mainpage.component.scss"],
 })
 export class MainpageComponent implements OnInit {
-  public spiele: Spieltag[] = [];
-  public allGames: Spieltag[] = [];
-  private editEle: Spieltag;
-  public dataSource: MatTableDataSource<Spieltag>;
+  public svdEvents: SvdEvent[] = [];
+  public allEvents: SvdEvent[] = [];
+  private editEle: SvdEvent;
+  public dataSource: MatTableDataSource<SvdEvent>;
   public displayedColumns: string[] = [];
   public isMobileScreen: boolean;
   public showOldDates: boolean;
@@ -55,54 +55,54 @@ export class MainpageComponent implements OnInit {
     this.showOldDates = false;
     this.checkToken();
     this.setGui(this.isMobileScreen);
-    this.getAllGames();
+    this.getAllEvents();
     this.httpService.getApiInfo().subscribe((result) => {
       const i = result;
     });
   }
 
-  private getAllGames() {
+  private getAllEvents() {
     this.dataSource = null;
-    this.spiele = [];
-    this.allGames = [];
-    this.httpService.getAllData().subscribe((result: Spieltag[]) => {
+    this.svdEvents = [];
+    this.allEvents = [];
+    this.httpService.getAllData().subscribe((result: SvdEvent[]) => {
       // set date and sort
-      for (const spiel of result) {
-        spiel.date = DateTime.fromSQL(spiel.datum);
+      for (const svdEvent of result) {
+        svdEvent.date = DateTime.fromSQL(svdEvent.datum);
       }
       result = result.sort((a, b) => this.sortByDate(a, b));
       // loop again to set correct weekend
-      for (const spiel of result) {
-        this.checkWeekDay(spiel);
-        const newGame = new Spieltag();
-        newGame.createFrom(spiel);
-        this.allGames.push(newGame);
-        this.spiele.push(newGame);
+      for (const svdEv of result) {
+        this.checkWeekDay(svdEv);
+        const newGame = new SvdEvent();
+        newGame.createFrom(svdEv);
+        this.allEvents.push(newGame);
+        this.svdEvents.push(newGame);
       }
-      this.filterGamesByDate();
-      this.dataSource = new MatTableDataSource<Spieltag>(this.spiele);
+      this.filterEventByDate();
+      this.dataSource = new MatTableDataSource<SvdEvent>(this.svdEvents);
       this.ngzone.run(() => {});
     });
   }
 
-  private checkWeekDay(spiel: Spieltag) {
-    if (!this.spiele || this.spiele.length === 0) {
-      this.spiele.push(this.createWeekEndGame(spiel.date));
+  private checkWeekDay(svdEvent: SvdEvent) {
+    if (!this.svdEvents || this.svdEvents.length === 0) {
+      this.svdEvents.push(this.createWeekEndEvent(svdEvent.date));
       return;
     }
-    if (this.spiele[this.spiele.length - 1].weekEndRow) {
+    if (this.svdEvents[this.svdEvents.length - 1].weekEndRow) {
       return;
     }
     if (
-      spiel.date.weekNumber !==
-      this.spiele[this.spiele.length - 1].date.weekNumber
+      svdEvent.date.weekNumber !==
+      this.svdEvents[this.svdEvents.length - 1].date.weekNumber
     ) {
-      this.spiele.push(this.createWeekEndGame(spiel.date));
+      this.svdEvents.push(this.createWeekEndEvent(svdEvent.date));
     }
   }
 
-  private createWeekEndGame(date: DateTime): Spieltag {
-    const newGame = new Spieltag();
+  private createWeekEndEvent(date: DateTime): SvdEvent {
+    const newGame = new SvdEvent();
     newGame.weekEndRow = true;
     newGame.weekEndText = "KW " + date.weekNumber;
     return newGame;
@@ -110,68 +110,68 @@ export class MainpageComponent implements OnInit {
 
   public toggleDate() {
     this.showOldDates = !this.showOldDates;
-    this.filterGamesByDate();
+    this.filterEventByDate();
   }
 
-  private filterGamesByDate() {
-    this.spiele = [];
-    for (const game of this.allGames) {
-      this.checkWeekDay(game);
-      const newGame = new Spieltag();
-      newGame.createFrom(game);
-      if (!this.showOldDates && !this.checkTodayDate(game.date)) {
+  private filterEventByDate() {
+    this.svdEvents = [];
+    for (const svdEvent of this.allEvents) {
+      this.checkWeekDay(svdEvent);
+      const newEvent = new SvdEvent();
+      newEvent.createFrom(svdEvent);
+      if (!this.showOldDates && !this.checkTodayDate(svdEvent.date)) {
         continue;
       } else {
-        this.spiele.push(newGame);
+        this.svdEvents.push(newEvent);
       }
     }
-    const games = [...this.spiele];
-    this.dataSource = new MatTableDataSource(games);
+    const svdEvents = [...this.svdEvents];
+    this.dataSource = new MatTableDataSource(svdEvents);
     this.dataSource.paginator = this.dataSource.paginator;
   }
 
-  public edit(element: Spieltag) {
-    this.editEle = new Spieltag();
+  public edit(element: SvdEvent) {
+    this.editEle = new SvdEvent();
     this.editEle.createFrom(element);
-    const dialogRef = this.dialog.open(EditMatchDayComponent, {
+    const dialogRef = this.dialog.open(EditEventComponent, {
       data: this.editEle,
     });
 
-    dialogRef.afterClosed().subscribe((result: Spieltag) => {
+    dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
         element = result;
         element.date = DateTime.fromISO(element.datum);
         element.datum = element.date.toSQL({ includeOffset: false });
-        this.saveGame(element);
+        this.saveEvent(element);
       } else {
         // nothing to do
       }
     });
   }
 
-  public showInfo(element: Spieltag) {
-    const dialogRef = this.dialog.open(InfoGameComponent, {
+  public showInfo(element: SvdEvent) {
+    const dialogRef = this.dialog.open(InfoEventComponent, {
       data: element,
     });
   }
 
-  public delete(element: Spieltag) {
+  public delete(element: SvdEvent) {
     const dialogRef = this.dialog.open(ConfirmBoxComponent, {
       data: element,
     });
 
-    dialogRef.afterClosed().subscribe((result: Spieltag) => {
+    dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
-        this.deleteGame(element.id);
+        this.deleteEvent(element.id);
       }
     });
   }
 
-  public newGame() {
-    const dialogRef = this.dialog.open(CreateGameComponent);
-    dialogRef.afterClosed().subscribe((result: Spieltag) => {
+  public newEvent() {
+    const dialogRef = this.dialog.open(CreateEventComponent);
+    dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
-        this.addGame(result);
+        this.addEvent(result);
       }
     });
   }
@@ -185,15 +185,15 @@ export class MainpageComponent implements OnInit {
     return date.valueOf() > DateTime.local().valueOf();
   }
 
-  private saveGame(element: Spieltag) {
-    this.httpService.saveGame(element).subscribe(
+  private saveEvent(element: SvdEvent) {
+    this.httpService.saveEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {
           this.openSnackBar("Gespeichert", "Ok");
         } else {
           this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
         }
-        this.getAllGames();
+        this.getAllEvents();
       },
       (err) => {
         this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
@@ -201,15 +201,15 @@ export class MainpageComponent implements OnInit {
     );
   }
 
-  private addGame(element: Spieltag) {
-    this.httpService.addGame(element).subscribe(
+  private addEvent(element: SvdEvent) {
+    this.httpService.addEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {
-          this.openSnackBar("Spiel angelegt", "Ok");
+          this.openSnackBar("Event angelegt", "Ok");
         } else {
           this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
         }
-        this.getAllGames();
+        this.getAllEvents();
       },
       (err) => {
         this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
@@ -217,15 +217,15 @@ export class MainpageComponent implements OnInit {
     );
   }
 
-  private deleteGame(id: number) {
-    this.httpService.deleteGame(id).subscribe(
+  private deleteEvent(id: number) {
+    this.httpService.deleteEvent(id).subscribe(
       (saved: boolean) => {
         if (saved) {
           this.openSnackBar("Gelöscht", "Ok");
         } else {
           this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
         }
-        this.getAllGames();
+        this.getAllEvents();
       },
       (err) => {
         this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
@@ -311,7 +311,7 @@ export class MainpageComponent implements OnInit {
     this.setGui(this.isMobileScreen);
   }
 
-  private sortByDate(a: Spieltag, b: Spieltag) {
+  private sortByDate(a: SvdEvent, b: SvdEvent) {
     if (a.date.toMillis() < b.date.toMillis()) {
       return -1;
     }

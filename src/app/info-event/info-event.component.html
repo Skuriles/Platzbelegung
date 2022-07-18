@@ -1,0 +1,11 @@
+<h2 mat-dialog-title>Event Info</h2>
+<mat-dialog-content class="mat-typography">
+  <div>
+    Mannschaft: {{ event.mannschaft }}<br />
+    Details: {{ event.details }} <br />
+    Datum: {{ event.date | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm" }}
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Schließen</button>
+</mat-dialog-actions>
