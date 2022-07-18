@@ -8,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    // "phpcopy": "@powershell copy \"D:/nodeProj/Vertiefung_Webanwendungen/svdapi.php\"  D:/Bene/Web/XAMPP/htdocs/wptest_master/wp-content/plugins/svdapi/svdapi.php"
+    "phpcopy": "@powershell copy \"D:/nodeProj/Vertiefung_Webanwendungen/svdapi.php\"  D:/Bene/Web/XAMPP/htdocs/wptest_master/wp-content/plugins/svdapi/svdapi.php"
   },
   "private": true,
   "dependencies": {
