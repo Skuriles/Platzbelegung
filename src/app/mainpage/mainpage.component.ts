@@ -2,7 +2,7 @@ import { Component, NgZone, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { DateTime, Settings } from "luxon";
 import { Credentials } from "../classes/credentials";
-import { SvdEvent } from "../classes/svdEvent";
+import { Spieltag, SvdEvent } from "../classes/svdEvent";
 import { TokenData } from "../classes/tokenData";
 import { EditEventComponent } from "../edit-event/edit-event-day.component";
 import { LoginComponent } from "../login/login.component";
@@ -31,6 +31,8 @@ export class MainpageComponent implements OnInit {
   public isMobileScreen: boolean;
   public showOldDates: boolean;
   public adminBtn: boolean;
+  public viewDate: Date = new Date();
+  public events: [] = [];
 
   constructor(
     private httpService: HttpService,
@@ -67,21 +69,30 @@ export class MainpageComponent implements OnInit {
     this.allEvents = [];
     this.httpService.getAllData().subscribe((result: SvdEvent[]) => {
       // set date and sort
-      for (const svdEvent of result) {
-        svdEvent.date = DateTime.fromSQL(svdEvent.datum);
+      for (const spiel of result) {
+        spiel.date = DateTime.fromSQL(spiel.datum);
       }
-      result = result.sort((a, b) => this.sortByDate(a, b));
-      // loop again to set correct weekend
-      for (const svdEv of result) {
-        this.checkWeekDay(svdEv);
-        const newGame = new SvdEvent();
-        newGame.createFrom(svdEv);
-        this.allEvents.push(newGame);
-        this.svdEvents.push(newGame);
-      }
-      this.filterEventByDate();
-      this.dataSource = new MatTableDataSource<SvdEvent>(this.svdEvents);
-      this.ngzone.run(() => {});
+      this.httpService.getAllGames().subscribe((spieltage: Spieltag[]) => {
+        // set date and sort
+        for (const spiel of spieltage) {
+          spiel.date = DateTime.fromSQL(spiel.datum);
+          const spielEvent = spiel.convert();
+          result.push(spielEvent);
+        }
+        result = result.sort((a, b) => this.sortByDate(a, b));
+        // loop again to set correct weekend
+        for (const svdEvent of result) {
+          this.checkWeekDay(svdEvent);
+          const newEvent = new SvdEvent();
+          newEvent.createFrom(svdEvent);
+          this.allEvents.push(newEvent);
+          this.svdEvents.push(newEvent);
+        }
+        result = result.sort((a, b) => this.sortByDate(a, b));
+        this.filterEventByDate();
+        this.dataSource = new MatTableDataSource<SvdEvent>(this.svdEvents);
+        this.ngzone.run(() => {});
+      });
     });
   }
 
@@ -332,7 +343,7 @@ export class MainpageComponent implements OnInit {
     if (isMobile) {
       this.displayedColumns = ["datum", "mannschaft", "person"];
     } else {
-      this.displayedColumns = ["datum", "mannschaft", "heim", "gast", "person"];
+      this.displayedColumns = ["datum", "mannschaft", "details", "person"];
     }
     if (this.loginService.loggedIn) {
       this.displayedColumns.push("edit");

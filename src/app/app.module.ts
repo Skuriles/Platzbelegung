@@ -1,9 +1,7 @@
-import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule } from "@angular/common/http";
-import { NoopAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
-import { FormsModule } from "@angular/forms";
 
 import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
@@ -28,6 +26,10 @@ import { ConfirmBoxComponent } from "./confirm-box/confirm-box.component";
 import { CreateEventComponent } from "./create-event/create-event.component";
 import { UploadCsvComponent } from "./upload-csv/upload-csv.component";
 import { InfoEventComponent } from "./info-event/info-event.component";
+import { BrowserModule } from "@angular/platform-browser";
+import { FormsModule } from "@angular/forms";
+import { CalendarModule, DateAdapter } from "angular-calendar";
+import { adapterFactory } from "angular-calendar/date-adapters/date-fns";
 
 @NgModule({
   declarations: [
@@ -42,9 +44,9 @@ import { InfoEventComponent } from "./info-event/info-event.component";
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     LayoutModule,
     FormsModule,
-    NoopAnimationsModule,
     AppRoutingModule,
     MatInputModule,
     MatButtonModule,
@@ -57,6 +59,10 @@ import { InfoEventComponent } from "./info-event/info-event.component";
     MatFormFieldModule,
     MatDialogModule,
     LuxonModule,
+    CalendarModule.forRoot({
+      provide: DateAdapter,
+      useFactory: adapterFactory,
+    }),
   ],
   providers: [HttpService, LoginService],
   bootstrap: [StartComponent],

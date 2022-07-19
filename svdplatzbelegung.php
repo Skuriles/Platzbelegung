@@ -19,6 +19,12 @@ add_action('rest_api_init', function () {
         'callback' => 'get_all_svdapi_data',
     ));
 
+    register_rest_route('svd_platzbelegung/v1', '/getAllGames', array(
+        'methods' => 'POST',
+        'callback' => 'get_all_svdapi_games',
+    ));
+    
+
     register_rest_route('svd_platzbelegung/v1', '/saveGame', array(
         'methods' => 'POST',
         'callback' => 'save_svdapi_event',
@@ -78,6 +84,14 @@ function get_all_svdapi_data()
 {
     global $wpdb;
     $table = $wpdb->prefix . svdPlatzbelegungTable;
+    $results = $wpdb->get_results("SELECT * FROM $table");
+    return $results;
+}
+
+function get_all_svdapi_games()
+{
+    global $wpdb;
+    $table = $wpdb->prefix . svdTable;
     $results = $wpdb->get_results("SELECT * FROM $table");
     return $results;
 }

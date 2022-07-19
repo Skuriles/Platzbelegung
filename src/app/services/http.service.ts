@@ -53,6 +53,11 @@ export class HttpService {
     return this.postRequest(nodeUrl, null);
   }
 
+  public getAllGames() {
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/getAllGames";
+    return this.postRequest(nodeUrl, null);
+  }
+
   public saveEvent(element: SvdEvent) {
     const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/saveEvent";
     const body = { element };
@@ -70,10 +75,10 @@ export class HttpService {
     return this.postAuthRequest(nodeUrl, null);
   }
 
-  public uploadCsv(files: File[]) {
-    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/uploadCsv";
-    return this.postAuthUploadRequest(nodeUrl, files);
-  }
+  // public uploadCsv(files: File[]) {
+  //   const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/uploadCsv";
+  //   return this.postAuthUploadRequest(nodeUrl, files);
+  // }
   // default http requests
   private postRequest(nodeUrl: string, body: any) {
     return this.http.post(nodeUrl, body);

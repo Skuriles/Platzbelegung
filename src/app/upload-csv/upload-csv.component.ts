@@ -31,12 +31,12 @@ export class UploadCsvComponent {
   }
 
   public upload() {
-    this.httpService.uploadCsv(this.files).subscribe((result: any) => {
-      if (result && result.success) {
-        this.dialogRef.close(true);
-      } else {
-        this.dialogRef.close(false);
-      }
-    });
+    // this.httpService.uploadCsv(this.files).subscribe((result: any) => {
+    //   if (result && result.success) {
+    //     this.dialogRef.close(true);
+    //   } else {
+    //     this.dialogRef.close(false);
+    //   }
+    // });
   }
 }

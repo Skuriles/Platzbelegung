@@ -8,8 +8,8 @@
     Bearbeiten
   </button>
   <button mat-raised-button (click)="toggleDate()" color="basic">
-    <span *ngIf="!showOldDates">Alle Spiele</span>
-    <span *ngIf="showOldDates">Neue Spiele</span>
+    <span *ngIf="!showOldDates">Alle Events</span>
+    <span *ngIf="showOldDates">Neue Events</span>
   </button>
   <button
     mat-raised-button
@@ -27,14 +27,14 @@
   >
     Ausloggen
   </button>
-  <button
+  <!-- <button
     mat-stroked-button
     (click)="upload()"
     *ngIf="loginService.loggedIn && adminBtn"
     color="primary"
   >
     Upload
-  </button>
+  </button> -->
   <button
     mat-mini-fab
     color="primary"
@@ -45,6 +45,10 @@
     <mat-icon>add</mat-icon>
   </button>
 </div>
+
+<mwl-calendar-month-view [viewDate]="viewDate" [events]="events">
+</mwl-calendar-month-view>
+
 <div class="filter">
   <mat-form-field>
     <mat-label>Filter</mat-label>
@@ -97,14 +101,9 @@
     </td>
   </ng-container>
 
-  <ng-container matColumnDef="heim">
-    <th mat-header-cell *matHeaderCellDef>Heim</th>
-    <td mat-cell *matCellDef="let element">{{ element.heim }}</td>
-  </ng-container>
-
-  <ng-container matColumnDef="gast">
-    <th mat-header-cell *matHeaderCellDef>Gast</th>
-    <td mat-cell *matCellDef="let element">{{ element.gast }}</td>
+  <ng-container matColumnDef="details">
+    <th mat-header-cell *matHeaderCellDef>Details</th>
+    <td mat-cell *matCellDef="let element">{{ element.details }}</td>
   </ng-container>
 
   <ng-container matColumnDef="person">
