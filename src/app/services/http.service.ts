@@ -10,8 +10,8 @@ export class HttpService {
   constructor(private http: HttpClient) {}
 
   public token: TokenData;
-  //   private baseUrl = "http://localhost:65004/wptest_master/";
-  private baseUrl = "https://www.sv-deggenhausertal.de/";
+  private baseUrl = "http://localhost:65004/svd/";
+  //  private baseUrl = "https://www.sv-deggenhausertal.de/";
   private apiPrefix = this.baseUrl + "wp-json/";
 
   public getApiInfo() {
