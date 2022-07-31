@@ -16,6 +16,22 @@ import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
 import { ERoles } from "../enum/roles";
 import { CreateEventComponent } from "../create-event/create-event.component";
 import { InfoEventComponent } from "../info-event/info-event.component";
+import {
+  CalendarEvent,
+  CalendarEventAction,
+  CalendarEventTimesChangedEvent,
+  CalendarView,
+} from "angular-calendar";
+import {
+  startOfDay,
+  endOfDay,
+  subDays,
+  addDays,
+  endOfMonth,
+  isSameDay,
+  isSameMonth,
+  addHours,
+} from "date-fns";
 
 @Component({
   selector: "app-mainpage",
@@ -25,6 +41,7 @@ import { InfoEventComponent } from "../info-event/info-event.component";
 export class MainpageComponent implements OnInit {
   public svdEvents: SvdEvent[] = [];
   public allEvents: SvdEvent[] = [];
+  public view: CalendarView = CalendarView.Month;
   private editEle: SvdEvent;
   public dataSource: MatTableDataSource<SvdEvent>;
   public displayedColumns: string[] = [];
@@ -32,7 +49,7 @@ export class MainpageComponent implements OnInit {
   public showOldDates: boolean;
   public adminBtn: boolean;
   public viewDate: Date = new Date();
-  public events: [] = [];
+  public activeDayIsOpen = false;
 
   constructor(
     private httpService: HttpService,
@@ -63,32 +80,77 @@ export class MainpageComponent implements OnInit {
     });
   }
 
+  closeOpenMonthViewDay() {
+    this.activeDayIsOpen = false;
+  }
+
+  dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
+    if (isSameMonth(date, this.viewDate)) {
+      if (
+        (isSameDay(this.viewDate, date) && this.activeDayIsOpen === true) ||
+        events.length === 0
+      ) {
+        this.activeDayIsOpen = false;
+      } else {
+        this.activeDayIsOpen = true;
+      }
+      this.viewDate = date;
+    }
+  }
+
+  eventTimesChanged({
+    event,
+    newStart,
+    newEnd,
+  }: CalendarEventTimesChangedEvent): void {
+    this.svdEvents = this.svdEvents.map((iEvent) => {
+      if (iEvent === event) {
+        return {
+          ...event,
+          start: newStart,
+          end: newEnd,
+          startdateStr: iEvent.startdateStr,
+          enddateStr: iEvent.enddateStr,
+          name: iEvent.name,
+          details: iEvent.details,
+          mannschaft: iEvent.mannschaft,
+          person: iEvent.person,
+          weekEndRow: iEvent.weekEndRow,
+          weekEndText: iEvent.weekEndText,
+        };
+      }
+      return iEvent;
+    });
+    this.handleEvent("Dropped or resized", event);
+  }
+
+  handleEvent(action: string, event: CalendarEvent): void {
+    this.edit(this.allEvents.find((e) => e.id === event.id));
+  }
+
   private getAllEvents() {
     this.dataSource = null;
-    this.svdEvents = [];
     this.allEvents = [];
     this.httpService.getAllData().subscribe((result: SvdEvent[]) => {
       // set date and sort
-      for (const spiel of result) {
-        spiel.date = DateTime.fromSQL(spiel.datum);
+      for (const svdEvent of result) {
+        const newEvent = new SvdEvent();
+        newEvent.createFrom(svdEvent);
+        this.allEvents.push(newEvent);
       }
       this.httpService.getAllGames().subscribe((spieltage: Spieltag[]) => {
         // set date and sort
         for (const spiel of spieltage) {
           spiel.date = DateTime.fromSQL(spiel.datum);
-          const spielEvent = spiel.convert();
-          result.push(spielEvent);
+          const spielEvent = Spieltag.convert(spiel);
+          this.allEvents.push(spielEvent);
         }
-        result = result.sort((a, b) => this.sortByDate(a, b));
+        this.allEvents = this.allEvents.sort((a, b) => this.sortByDate(a, b));
         // loop again to set correct weekend
-        for (const svdEvent of result) {
+        for (const svdEvent of this.allEvents) {
           this.checkWeekDay(svdEvent);
-          const newEvent = new SvdEvent();
-          newEvent.createFrom(svdEvent);
-          this.allEvents.push(newEvent);
-          this.svdEvents.push(newEvent);
         }
-        result = result.sort((a, b) => this.sortByDate(a, b));
+        this.allEvents = this.allEvents.sort((a, b) => this.sortByDate(a, b));
         this.filterEventByDate();
         this.dataSource = new MatTableDataSource<SvdEvent>(this.svdEvents);
         this.ngzone.run(() => {});
@@ -97,18 +159,20 @@ export class MainpageComponent implements OnInit {
   }
 
   private checkWeekDay(svdEvent: SvdEvent) {
+    const startDateTime = DateTime.fromJSDate(svdEvent.start);
     if (!this.svdEvents || this.svdEvents.length === 0) {
-      this.svdEvents.push(this.createWeekEndEvent(svdEvent.date));
+      this.svdEvents.push(this.createWeekEndEvent(startDateTime));
       return;
     }
     if (this.svdEvents[this.svdEvents.length - 1].weekEndRow) {
       return;
     }
     if (
-      svdEvent.date.weekNumber !==
-      this.svdEvents[this.svdEvents.length - 1].date.weekNumber
+      startDateTime.weekNumber !==
+      DateTime.fromJSDate(this.svdEvents[this.svdEvents.length - 1].start)
+        .weekNumber
     ) {
-      this.svdEvents.push(this.createWeekEndEvent(svdEvent.date));
+      this.svdEvents.push(this.createWeekEndEvent(startDateTime));
     }
   }
 
@@ -130,7 +194,10 @@ export class MainpageComponent implements OnInit {
       this.checkWeekDay(svdEvent);
       const newEvent = new SvdEvent();
       newEvent.createFrom(svdEvent);
-      if (!this.showOldDates && !this.checkTodayDate(svdEvent.date)) {
+      if (
+        !this.showOldDates &&
+        !this.checkTodayDate(DateTime.fromJSDate(svdEvent.start))
+      ) {
         continue;
       } else {
         this.svdEvents.push(newEvent);
@@ -151,8 +218,14 @@ export class MainpageComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
         element = result;
-        element.date = DateTime.fromISO(element.datum);
-        element.datum = element.date.toSQL({ includeOffset: false });
+        element.start = DateTime.fromISO(element.startdateStr).toJSDate();
+        element.startdateStr = DateTime.fromJSDate(element.start).toSQL({
+          includeOffset: false,
+        });
+        element.end = DateTime.fromISO(element.enddateStr).toJSDate();
+        element.enddateStr = DateTime.fromJSDate(element.end).toSQL({
+          includeOffset: false,
+        });
         this.saveEvent(element);
       } else {
         // nothing to do
@@ -173,7 +246,7 @@ export class MainpageComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
-        this.deleteEvent(element.id);
+        this.deleteEvent(element.id as number);
       }
     });
   }
@@ -323,10 +396,12 @@ export class MainpageComponent implements OnInit {
   }
 
   private sortByDate(a: SvdEvent, b: SvdEvent) {
-    if (a.date.toMillis() < b.date.toMillis()) {
+    const aDate = DateTime.fromJSDate(a.start);
+    const bDate = DateTime.fromJSDate(b.start);
+    if (aDate.toMillis() < bDate.toMillis()) {
       return -1;
     }
-    if (a.date.toMillis() > b.date.toMillis()) {
+    if (aDate.toMillis() > bDate.toMillis()) {
       return 1;
     }
     // a muss gleich b sein

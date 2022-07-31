@@ -9,8 +9,8 @@
           matInput
           type="datetime-local"
           placeholder="Datum"
-          [ngModel]="event.date | date: 'yyyy-MM-ddTHH:mm'"
-          (ngModelChange)="event.datum = $event"
+          [ngModel]="event.start | date: 'yyyy-MM-ddTHH:mm'"
+          (ngModelChange)="event.startdateStr = $event"
           name="datum"
         />
       </mat-form-field>

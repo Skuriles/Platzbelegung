@@ -68,9 +68,11 @@ function init_svd_platzbelegung_api_database()
     $sql = "CREATE TABLE $table_name (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       name text NOT NULL,
-      datum datetime NOT NULL,
+      startdateStr datetime NOT NULL,
+      enddateStr datetime NOT NULL,
       mannschaft text NOT NULL,
       details text NOT NULL,
+      allday int NOT NULL default 0,
       person text,
       PRIMARY KEY  (id)
     ) $charset_collate;";
@@ -87,13 +89,13 @@ function get_all_platzbelegung_data()
     return $results;
 }
 
-// function get_all_svdapi_games()
-// {
-//     global $wpdb;
-//     $table = $wpdb->prefix . svdTable;
-//     $results = $wpdb->get_results("SELECT * FROM $table");
-//     return $results;
-// }
+function get_all_svdapi_games()
+{
+    global $wpdb;
+    $table = $wpdb->prefix . svdTable;
+    $results = $wpdb->get_results("SELECT * FROM $table");
+    return $results;
+}
 
 function save_svdapi_event(WP_REST_Request $request)
 {
@@ -102,15 +104,21 @@ function save_svdapi_event(WP_REST_Request $request)
     $table_name = $wpdb->prefix . svdPlatzbelegungTable;
     $result = $request->get_json_params();
     $ele = $result["element"];
-    $date = sanitize_text_field($ele["datum"]);
+    $startdate = sanitize_text_field($ele["startdate"]);
+    $enddate = sanitize_text_field($ele["enddate"]);
     $name = sanitize_text_field($ele["name"]);
     $person = sanitize_text_field($ele["person"]);
+    $details = sanitize_text_field($ele["details"]);
+    $allday = $ele["allday"];
     $result = $wpdb->update(
         $table_name,
         array(
             'name' => $name,
-            'datum' => $date,
+            'startdateStr' => $startdate,
+            'enddateStr' => $enddate,
             'person' => $person,
+            'details' => $details,
+            'allday' => $allday,
         ),
         array('id' => $ele["id"]));
     return $result;
@@ -123,22 +131,22 @@ function insert_svdapi_event(WP_REST_Request $request)
     $table_name = $wpdb->prefix . svdPlatzbelegungTable;
     $result = $request->get_json_params();
     $ele = $result["element"];
-    $date = sanitize_text_field($ele["datum"]);
-    $mannschaft = sanitize_text_field($ele["mannschaft"]);
-    $heim = sanitize_text_field($ele["heim"]);
-    $gast = sanitize_text_field($ele["gast"]);
-    $person = sanitize_text_field($ele["person"]);
+    $startdate = sanitize_text_field($ele["startdateStr"]);
+    $enddate = sanitize_text_field($ele["enddateStr"]);
     $name = sanitize_text_field($ele["name"]);
+    $person = sanitize_text_field($ele["person"]);
+    $details = sanitize_text_field($ele["details"]);
+    $allday = $ele["allday"];
     $result = $wpdb->insert(
         $table_name,
         array(
-            'datum' => $date,
             'name' => $name,
-            'mannschaft' => $mannschaft,
-            'heim' => $heim,
-            'gast' => $gast,
+            'startdateStr' => $startdate,
+            'enddateStr' => $enddate,
             'person' => $person,
-        )
+            'details' => $details,
+            'allday' => $allday,
+        ),
     );
     return $result;
 }
@@ -155,83 +163,3 @@ function remove_svdapi_event($data)
     );
     return $result;
 }
-
-// function import_svdapi_game(WP_REST_Request $request)
-// {
-
-//     $permittedExtension = 'csv';
-//     $permittedTypes = ['text/csv', 'text/plain', "application/octet-stream"];
-
-//     $files = $request->get_file_params();
-//     $headers = $request->get_headers();
-
-//     if (!empty($files) && !empty($files['file'])) {
-//         $file = $files['file'];
-//     }
-
-//     try {
-//         // smoke/sanity check
-//         if (!$file) {
-//             throw new PluginException('Error');
-//         }
-//         // confirm file uploaded via POST
-//         if (!is_uploaded_file($file['tmp_name'])) {
-//             throw new PluginException('File upload check failed ');
-//         }
-//         // confirm no file errors
-//         if (!$file['error'] === UPLOAD_ERR_OK) {
-//             throw new PluginException('Upload error: ' . $file['error']);
-//         }
-//         // confirm extension meets requirements
-//         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-//         if ($ext !== $permittedExtension) {
-//             throw new PluginException('Invalid extension. ');
-//         }
-//         // check type
-//         $mimeType = mime_content_type($file['tmp_name']);
-//         if (!in_array($file['type'], $permittedTypes)
-//             || !in_array($mimeType, $permittedTypes)) {
-//             throw new PluginException('Invalid mime type');
-//         }
-//     } catch (PluginException $pe) {
-//         return $pe->restApiErrorResponse('...');
-//     }
-
-//     // we've passed our checks, now read and process the file
-//     $handle = fopen($file['tmp_name'], 'r');
-//     $headerFlag = true;
-//     global $wpdb;
-
-//     $table_name = $wpdb->prefix . svdPlatzbelegungTable;
-//     while (($data = fgetcsv($handle, 1000, ',')) !== false) { // next arg is field delim e.g. "'"
-//         // skip csv's header row / first iteration of loop
-//         if ($headerFlag) {
-//             $headerFlag = false;
-//             continue;
-//         }
-//         // process rows in csv body
-//         if ($data[0]) {
-//             $date = sanitize_text_field($data[0]);
-//             $mannschaft = sanitize_text_field($data[1]);
-//             $heim = sanitize_text_field($data[2]);
-//             $gast = sanitize_text_field($data[3]);
-//             $result = $wpdb->insert(
-//                 $table_name,
-//                 array(
-//                     'datum' => $date,
-//                     'name' => "Heimspiel",
-//                     'mannschaft' => $mannschaft,
-//                     'details' => $heim . "vs" . $gast,
-//                 )
-//             );
-//             if (!$result) {
-//                 fclose($handle);
-//                 return rest_ensure_response(['success' => false]);
-//             }
-//         }
-
-//     }
-//     fclose($handle);
-//     // return any necessary data in the response here
-//     return rest_ensure_response(['success' => true]);
-// }

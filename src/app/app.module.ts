@@ -30,6 +30,11 @@ import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { CalendarModule, DateAdapter } from "angular-calendar";
 import { adapterFactory } from "angular-calendar/date-adapters/date-fns";
+import { registerLocaleData } from "@angular/common";
+import localeDe from "@angular/common/locales/de";
+import localeDeExtra from "@angular/common/locales/extra/de";
+
+registerLocaleData(localeDe, "de-DE", localeDeExtra);
 
 @NgModule({
   declarations: [

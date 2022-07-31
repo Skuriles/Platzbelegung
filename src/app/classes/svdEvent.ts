@@ -1,21 +1,35 @@
+import { CalendarEvent } from "angular-calendar";
+import { EventColor, EventAction } from "calendar-utils";
 import { DateTime } from "luxon";
 
-export class SvdEvent {
-  public id: number;
+export class SvdEvent implements CalendarEvent {
+  public start: Date;
+  public end?: Date;
+  public title: string;
+  public color?: EventColor;
+  public actions?: EventAction[];
+  public allDay?: boolean;
+  public cssClass?: string;
+  public resizable?: { beforeStart?: boolean; afterEnd?: boolean };
+  public draggable?: boolean;
+  public meta?: any;
+  public id?: number | string;
   public name: string;
-  public date: DateTime;
-  public datum: string;
+  public startdateStr: string;
+  public enddateStr: string;
   public mannschaft: string;
   public details: string;
   public person: string;
   public weekEndRow: boolean;
   public weekEndText: string;
 
-  public createFrom(element: SvdEvent) {
+  public createFrom?(element: SvdEvent) {
     this.id = element.id;
     this.name = element.name;
-    this.datum = element.datum;
-    this.date = DateTime.fromSQL(element.datum).toLocal();
+    this.startdateStr = element.startdateStr;
+    this.enddateStr = element.enddateStr;
+    this.start = DateTime.fromSQL(element.startdateStr).toLocal().toJSDate();
+    this.end = DateTime.fromSQL(element.enddateStr).toLocal().toJSDate();
     this.mannschaft = element.mannschaft;
     this.details = element.details;
     this.person = element.person;
@@ -25,17 +39,18 @@ export class SvdEvent {
 }
 
 export class Spieltag {
-  convert(): SvdEvent {
+  static convert(spieltag: Spieltag): SvdEvent {
     const event: SvdEvent = new SvdEvent();
-    event.id = this.id;
+    event.id = spieltag.id;
     event.name = "Heimspiel";
-    event.datum = this.datum;
-    event.date = DateTime.fromSQL(this.datum).toLocal();
-    event.mannschaft = this.mannschaft;
-    event.details = "Spiel: " + this.heim + " : " + this.gast;
-    event.person = this.person;
-    event.weekEndRow = this.weekEndRow;
-    event.weekEndText = this.weekEndText;
+    event.startdateStr = spieltag.datum;
+    event.start = DateTime.fromSQL(spieltag.datum).toLocal().toJSDate();
+    event.end = DateTime.fromSQL(spieltag.datum).toLocal().toJSDate();
+    event.mannschaft = spieltag.mannschaft;
+    event.details = "Spiel: " + spieltag.heim + " : " + spieltag.gast;
+    event.person = spieltag.person;
+    event.weekEndRow = spieltag.weekEndRow;
+    event.weekEndText = spieltag.weekEndText;
     return event;
   }
 

@@ -3,7 +3,7 @@
   <div>
     Mannschaft: {{ event.mannschaft }}<br />
     Details: {{ event.details }} <br />
-    Datum: {{ event.date | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm" }}
+    Datum: {{ event.start | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm" }}
   </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
