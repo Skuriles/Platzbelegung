@@ -20,6 +20,7 @@ import {
   CalendarEvent,
   CalendarEventAction,
   CalendarEventTimesChangedEvent,
+  CalendarEventTitleFormatter,
   CalendarView,
 } from "angular-calendar";
 import {
@@ -32,14 +33,22 @@ import {
   isSameMonth,
   addHours,
 } from "date-fns";
+import { CustomEventTitleFormatterService } from "../services/custom-event-title-formatter.service";
+import { Subject } from "rxjs";
 
 @Component({
   selector: "app-mainpage",
   templateUrl: "./mainpage.component.html",
   styleUrls: ["./mainpage.component.scss"],
+  providers: [
+    {
+      provide: CalendarEventTitleFormatter,
+      useClass: CustomEventTitleFormatterService,
+    },
+  ],
 })
 export class MainpageComponent implements OnInit {
-  public svdEvents: SvdEvent[] = [];
+  public tableEvents: SvdEvent[] = [];
   public allEvents: SvdEvent[] = [];
   public view: CalendarView = CalendarView.Month;
   private editEle: SvdEvent;
@@ -50,6 +59,25 @@ export class MainpageComponent implements OnInit {
   public adminBtn: boolean;
   public viewDate: Date = new Date();
   public activeDayIsOpen = false;
+  public refresh = new Subject<void>();
+
+  actions: CalendarEventAction[] = [
+    {
+      label: '<i class="fas fa-fw fa-pencil-alt"></i>',
+      a11yLabel: "Edit",
+      onClick: ({ event }: { event: CalendarEvent }): void => {
+        this.handleEvent("Edited", event);
+      },
+    },
+    {
+      label: '<i class="fas fa-fw fa-trash-alt"></i>',
+      a11yLabel: "Delete",
+      onClick: ({ event }: { event: CalendarEvent }): void => {
+        this.allEvents = this.allEvents.filter((iEvent) => iEvent !== event);
+        this.handleEvent("Deleted", event);
+      },
+    },
+  ];
 
   constructor(
     private httpService: HttpService,
@@ -103,7 +131,7 @@ export class MainpageComponent implements OnInit {
     newStart,
     newEnd,
   }: CalendarEventTimesChangedEvent): void {
-    this.svdEvents = this.svdEvents.map((iEvent) => {
+    this.allEvents = this.allEvents.map((iEvent) => {
       if (iEvent === event) {
         return {
           ...event,
@@ -111,7 +139,9 @@ export class MainpageComponent implements OnInit {
           end: newEnd,
           startdateStr: iEvent.startdateStr,
           enddateStr: iEvent.enddateStr,
-          name: iEvent.name,
+          startDatetime: iEvent.startDatetime,
+          endDatetime: iEvent.endDatetime,
+          title: iEvent.title,
           details: iEvent.details,
           mannschaft: iEvent.mannschaft,
           person: iEvent.person,
@@ -131,6 +161,7 @@ export class MainpageComponent implements OnInit {
   private getAllEvents() {
     this.dataSource = null;
     this.allEvents = [];
+    this.tableEvents = [];
     this.httpService.getAllData().subscribe((result: SvdEvent[]) => {
       // set date and sort
       for (const svdEvent of result) {
@@ -152,27 +183,26 @@ export class MainpageComponent implements OnInit {
         }
         this.allEvents = this.allEvents.sort((a, b) => this.sortByDate(a, b));
         this.filterEventByDate();
-        this.dataSource = new MatTableDataSource<SvdEvent>(this.svdEvents);
+        this.dataSource = new MatTableDataSource<SvdEvent>(this.tableEvents);
+        this.refresh.next();
         this.ngzone.run(() => {});
       });
     });
   }
 
   private checkWeekDay(svdEvent: SvdEvent) {
-    const startDateTime = DateTime.fromJSDate(svdEvent.start);
-    if (!this.svdEvents || this.svdEvents.length === 0) {
-      this.svdEvents.push(this.createWeekEndEvent(startDateTime));
+    if (!this.allEvents || this.allEvents.length === 0) {
+      this.tableEvents.push(this.createWeekEndEvent(svdEvent.startDatetime));
       return;
     }
-    if (this.svdEvents[this.svdEvents.length - 1].weekEndRow) {
+    if (this.tableEvents[this.tableEvents.length - 1]?.weekEndRow) {
       return;
     }
     if (
-      startDateTime.weekNumber !==
-      DateTime.fromJSDate(this.svdEvents[this.svdEvents.length - 1].start)
-        .weekNumber
+      svdEvent.startDatetime.weekNumber !==
+      this.tableEvents[this.tableEvents.length - 1]?.startDatetime.weekNumber
     ) {
-      this.svdEvents.push(this.createWeekEndEvent(startDateTime));
+      this.tableEvents.push(this.createWeekEndEvent(svdEvent.startDatetime));
     }
   }
 
@@ -189,21 +219,18 @@ export class MainpageComponent implements OnInit {
   }
 
   private filterEventByDate() {
-    this.svdEvents = [];
+    this.tableEvents = [];
     for (const svdEvent of this.allEvents) {
       this.checkWeekDay(svdEvent);
       const newEvent = new SvdEvent();
       newEvent.createFrom(svdEvent);
-      if (
-        !this.showOldDates &&
-        !this.checkTodayDate(DateTime.fromJSDate(svdEvent.start))
-      ) {
+      if (!this.showOldDates && !this.checkTodayDate(svdEvent.endDatetime)) {
         continue;
       } else {
-        this.svdEvents.push(newEvent);
+        this.tableEvents.push(newEvent);
       }
     }
-    const svdEvents = [...this.svdEvents];
+    const svdEvents = [...this.tableEvents];
     this.dataSource = new MatTableDataSource(svdEvents);
     this.dataSource.paginator = this.dataSource.paginator;
   }
@@ -219,10 +246,12 @@ export class MainpageComponent implements OnInit {
       if (result) {
         element = result;
         element.start = DateTime.fromISO(element.startdateStr).toJSDate();
+        element.startDatetime = DateTime.fromISO(element.startdateStr);
         element.startdateStr = DateTime.fromJSDate(element.start).toSQL({
           includeOffset: false,
         });
         element.end = DateTime.fromISO(element.enddateStr).toJSDate();
+        element.endDatetime = DateTime.fromISO(element.enddateStr);
         element.enddateStr = DateTime.fromJSDate(element.end).toSQL({
           includeOffset: false,
         });
@@ -396,8 +425,8 @@ export class MainpageComponent implements OnInit {
   }
 
   private sortByDate(a: SvdEvent, b: SvdEvent) {
-    const aDate = DateTime.fromJSDate(a.start);
-    const bDate = DateTime.fromJSDate(b.start);
+    const aDate = a.startDatetime;
+    const bDate = b.startDatetime;
     if (aDate.toMillis() < bDate.toMillis()) {
       return -1;
     }
@@ -416,9 +445,15 @@ export class MainpageComponent implements OnInit {
 
   public setGui(isMobile: boolean) {
     if (isMobile) {
-      this.displayedColumns = ["datum", "mannschaft", "person"];
+      this.displayedColumns = ["datum", "datumEnd", "mannschaft", "person"];
     } else {
-      this.displayedColumns = ["datum", "mannschaft", "details", "person"];
+      this.displayedColumns = [
+        "datum",
+        "datumEnd",
+        "mannschaft",
+        "details",
+        "person",
+      ];
     }
     if (this.loginService.loggedIn) {
       this.displayedColumns.push("edit");

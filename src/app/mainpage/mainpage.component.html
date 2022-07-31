@@ -66,8 +66,9 @@
     </div>
     <mwl-calendar-month-view
       [viewDate]="viewDate"
-      [events]="svdEvents"
+      [events]="allEvents"
       [activeDayIsOpen]="activeDayIsOpen"
+      [refresh]="refresh"
       (dayClicked)="dayClicked($event.day)"
       (eventClicked)="handleEvent('Clicked', $event.event)"
       (eventTimesChanged)="eventTimesChanged($event)"
@@ -93,15 +94,42 @@
         *matCellDef="let element"
         [ngClass]="{ mobileDate: isMobileScreen }"
       >
-        <span *ngIf="!element.weekEndRow && !isMobileScreen">
-          {{ element.start | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm" }}
+        <span *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay">
+          {{
+            element.startDatetime
+              | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+          }}
           Uhr
         </span>
-        <span *ngIf="!element.weekEndRow && isMobileScreen">
-          {{ element.start | dateTimeToFormat: "dd.MM. - HH:mm" }}
+        <span *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay">
+          {{ element.startDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
+        </span>
+        <span *ngIf="!element.weekEndRow && element.allDay">
+          {{ element.startDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
         </span>
         <span *ngIf="element.weekEndRow">
           {{ element.weekEndText }}
+        </span>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="datumEnd">
+      <th mat-header-cell *matHeaderCellDef>Ende</th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        [ngClass]="{ mobileDate: isMobileScreen }"
+      >
+        <span *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay">
+          {{
+            element.endDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+          }}
+          Uhr
+        </span>
+        <span *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay">
+          {{ element.endDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
+        </span>
+        <span *ngIf="!element.weekEndRow && element.allDay">
+          {{ element.endDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
         </span>
       </td>
     </ng-container>

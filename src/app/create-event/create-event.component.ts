@@ -13,7 +13,11 @@ export class CreateEventComponent implements OnInit {
   constructor() {
     this.event = new SvdEvent();
     this.event.start = DateTime.local().toJSDate();
+    this.event.startDatetime = DateTime.local();
     this.event.startdateStr = DateTime.fromJSDate(this.event.start).toISO();
+    this.event.end = DateTime.local().toJSDate();
+    this.event.endDatetime = DateTime.local();
+    this.event.enddateStr = DateTime.fromJSDate(this.event.end).toISO();
   }
 
   ngOnInit(): void {}

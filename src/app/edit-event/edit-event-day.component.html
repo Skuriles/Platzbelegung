@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>Event bearbeiten</h2>
 <mat-dialog-content class="mat-typography">
-  <div>Event: {{ event.name }}</div>
+  <div>Event: {{ event.title }}</div>
   <div class="login">
     <form class="example-form">
       <mat-form-field class="example-full-width">
@@ -9,7 +9,7 @@
           matInput
           type="datetime-local"
           placeholder="Datum"
-          [ngModel]="event.start | date: 'yyyy-MM-ddTHH:mm'"
+          [ngModel]="event.startDatetime | date: 'yyyy-MM-ddTHH:mm'"
           (ngModelChange)="event.startdateStr = $event"
           name="datum"
         />
@@ -20,8 +20,8 @@
           matInput
           type="text"
           placeholder="Name"
-          [ngModel]="event.name"
-          (ngModelChange)="event.name = $event"
+          [ngModel]="event.title"
+          (ngModelChange)="event.title = $event"
           name="name"
         />
       </mat-form-field>

@@ -67,12 +67,12 @@ function init_svd_platzbelegung_api_database()
 
     $sql = "CREATE TABLE $table_name (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
-      name text NOT NULL,
+      title text NOT NULL,
       startdateStr datetime NOT NULL,
       enddateStr datetime NOT NULL,
       mannschaft text NOT NULL,
       details text NOT NULL,
-      allday int NOT NULL default 0,
+      allDayPhp boolean NOT NULL default 0,
       person text,
       PRIMARY KEY  (id)
     ) $charset_collate;";
@@ -106,19 +106,19 @@ function save_svdapi_event(WP_REST_Request $request)
     $ele = $result["element"];
     $startdate = sanitize_text_field($ele["startdate"]);
     $enddate = sanitize_text_field($ele["enddate"]);
-    $name = sanitize_text_field($ele["name"]);
+    $title = sanitize_text_field($ele["title"]);
     $person = sanitize_text_field($ele["person"]);
     $details = sanitize_text_field($ele["details"]);
-    $allday = $ele["allday"];
+    $allday = $ele["allDayPhp"];
     $result = $wpdb->update(
         $table_name,
         array(
-            'name' => $name,
+            'title' => $title,
             'startdateStr' => $startdate,
             'enddateStr' => $enddate,
             'person' => $person,
             'details' => $details,
-            'allday' => $allday,
+            'allDayPhp' => $allday,
         ),
         array('id' => $ele["id"]));
     return $result;
@@ -133,19 +133,19 @@ function insert_svdapi_event(WP_REST_Request $request)
     $ele = $result["element"];
     $startdate = sanitize_text_field($ele["startdateStr"]);
     $enddate = sanitize_text_field($ele["enddateStr"]);
-    $name = sanitize_text_field($ele["name"]);
+    $title = sanitize_text_field($ele["title"]);
     $person = sanitize_text_field($ele["person"]);
     $details = sanitize_text_field($ele["details"]);
-    $allday = $ele["allday"];
+    $allday = $ele["allDayPhp"];
     $result = $wpdb->insert(
         $table_name,
         array(
-            'name' => $name,
+            'title' => $title,
             'startdateStr' => $startdate,
             'enddateStr' => $enddate,
             'person' => $person,
             'details' => $details,
-            'allday' => $allday,
+            'allDayPhp' => $allday,
         ),
     );
     return $result;
