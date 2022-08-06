@@ -2,24 +2,70 @@
 <mat-dialog-content class="mat-typography">
   <div class="login">
     <form class="example-form">
+      <section class="example-section">
+        <mat-checkbox
+          class="example-margin"
+          [(ngModel)]="event.allDay"
+          name="allday"
+          >Ganztag-Event</mat-checkbox
+        >
+      </section>
+      <div *ngIf="!event.allDay">
+        <mat-form-field class="example-full-width">
+          <mat-label>Start</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            placeholder="Start"
+            [ngModel]="event.startDatetime | date: dateFormat"
+            (ngModelChange)="event.startdateStr = $event"
+            name="start"
+          />
+        </mat-form-field>
+        <mat-form-field class="example-full-width">
+          <mat-label>Ende</mat-label>
+          <input
+            matInput
+            type="datetime-local"
+            placeholder="Ende"
+            [ngModel]="event.endDatetime | date: dateFormat"
+            (ngModelChange)="event.enddateStr = $event"
+            name="ende"
+          />
+        </mat-form-field>
+      </div>
+      <div *ngIf="event.allDay">
+        <mat-form-field appearance="fill">
+          <mat-label>Zeitraum eingeben</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input
+              matStartDate
+              [(ngModel)]="event.startDatetime"
+              placeholder="Start Datum"
+              name="allDayStart"
+            />
+            <input
+              matEndDate
+              [(ngModel)]="event.endDatetime"
+              placeholder="Ende Datum"
+              name="allDayEnd"
+            />
+          </mat-date-range-input>
+          <mat-hint>MM.DD.YYYY – MM.DD.YYYY</mat-hint>
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+      </div>
       <mat-form-field class="example-full-width">
-        <mat-label>Datum</mat-label>
+        <mat-label>Titel</mat-label>
         <input
           matInput
-          type="datetime-local"
-          placeholder="Datum"
-          [ngModel]="event.startDatetime | date: 'yyyy-MM-ddTHH:mm'"
-          (ngModelChange)="event.startdateStr = $event"
-          name="datum"
-        />
-      </mat-form-field>
-      <mat-form-field class="example-full-width">
-        <mat-label>Mannschaft</mat-label>
-        <input
-          matInput
-          placeholder="Mannschaft und Staffel"
-          [(ngModel)]="event.mannschaft"
-          name="mannschaft"
+          placeholder="Titel"
+          [(ngModel)]="event.title"
+          name="title"
         />
       </mat-form-field>
       <mat-form-field class="example-full-width">
@@ -31,8 +77,16 @@
           name="details"
         />
       </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Gelände</mat-label>
+        <mat-select name="ort" multiple [(ngModel)]="event.orte">
+          <mat-option *ngFor="let val of orte" [value]="val">{{
+            val
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
       <mat-form-field class="example-full-width">
-        <mat-label>Person</mat-label>
+        <mat-label>Ansprechpartner</mat-label>
         <input
           matInput
           placeholder="Person"

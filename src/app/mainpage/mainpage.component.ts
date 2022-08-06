@@ -133,21 +133,11 @@ export class MainpageComponent implements OnInit {
   }: CalendarEventTimesChangedEvent): void {
     this.allEvents = this.allEvents.map((iEvent) => {
       if (iEvent === event) {
-        return {
-          ...event,
-          start: newStart,
-          end: newEnd,
-          startdateStr: iEvent.startdateStr,
-          enddateStr: iEvent.enddateStr,
-          startDatetime: iEvent.startDatetime,
-          endDatetime: iEvent.endDatetime,
-          title: iEvent.title,
-          details: iEvent.details,
-          mannschaft: iEvent.mannschaft,
-          person: iEvent.person,
-          weekEndRow: iEvent.weekEndRow,
-          weekEndText: iEvent.weekEndText,
-        };
+        const newEvent = new SvdEvent();
+        newEvent.createFrom(iEvent);
+        newEvent.start = newStart;
+        newEvent.end = newEnd;
+        return newEvent;
       }
       return iEvent;
     });
@@ -299,6 +289,8 @@ export class MainpageComponent implements OnInit {
   }
 
   private saveEvent(element: SvdEvent) {
+    element.allDayPhp = element.allDay ? "1" : "0";
+    element.setOrte();
     this.httpService.saveEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {
@@ -315,6 +307,8 @@ export class MainpageComponent implements OnInit {
   }
 
   private addEvent(element: SvdEvent) {
+    element.allDayPhp = element.allDay ? "1" : "0";
+    element.setOrte();
     this.httpService.addEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {

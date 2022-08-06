@@ -1,10 +1,16 @@
 <h2 mat-dialog-title>Event Info</h2>
 <mat-dialog-content class="mat-typography">
   <div>
-    Mannschaft: {{ event.mannschaft }}<br />
+    Titel: {{ event.title }}<br />
     Details: {{ event.details }} <br />
-    Datum:
-    {{ event.startDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm" }}
+    Datum: <br />
+    {{ event.startDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+    }}<br />
+    bis <br />
+    {{ event.endDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+    }}<br />
+    Verantwortlicher:
+    {{ event.title }}
   </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

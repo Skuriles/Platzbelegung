@@ -1,6 +1,8 @@
 import { CalendarEvent } from "angular-calendar";
 import { EventColor, EventAction } from "calendar-utils";
+import { el } from "date-fns/locale";
 import { DateTime } from "luxon";
+import { ORTE } from "./orte";
 
 export class SvdEvent implements CalendarEvent {
   public start: Date;
@@ -19,11 +21,13 @@ export class SvdEvent implements CalendarEvent {
   public id?: number | string;
   public startdateStr: string;
   public enddateStr: string;
-  public mannschaft: string;
   public details: string;
   public person: string;
   public weekEndRow: boolean;
   public weekEndText: string;
+  public orte: string[] = [];
+  public ortePhp: string = "";
+  public isGame = false;
 
   public createFrom?(element: SvdEvent) {
     this.id = element.id;
@@ -34,13 +38,29 @@ export class SvdEvent implements CalendarEvent {
     this.end = DateTime.fromSQL(element.enddateStr).toLocal().toJSDate();
     this.startDatetime = DateTime.fromSQL(element.startdateStr).toLocal();
     this.endDatetime = DateTime.fromSQL(element.enddateStr).toLocal();
-    this.mannschaft = element.mannschaft;
     this.details = element.details;
     this.person = element.person;
     this.weekEndRow = element.weekEndRow;
     this.weekEndText = element.weekEndText;
     this.allDay = element.allDayPhp === "1" ? true : false;
     this.allDayPhp = element.allDayPhp;
+    this.orte = this.parseOrte(element.ortePhp);
+    this.ortePhp = element.ortePhp;
+    this.isGame = element.isGame;
+  }
+  parseOrte(ortePhp: string): string[] {
+    ortePhp = ortePhp.replace("[", "");
+    ortePhp = ortePhp.replace("]", "");
+    const tokens = ortePhp.split(",");
+    return tokens;
+  }
+
+  setOrte(): void {
+    for (const ort of this.orte) {
+      this.ortePhp += ort;
+      this.ortePhp += ",";
+    }
+    this.ortePhp = this.ortePhp.slice(0, -1);
   }
 }
 
@@ -48,6 +68,8 @@ export class Spieltag {
   static convert(spieltag: Spieltag): SvdEvent {
     const event: SvdEvent = new SvdEvent();
     event.id = spieltag.id;
+    event.allDay = false;
+    event.isGame = true;
     event.title = "Heimspiel";
     event.startdateStr = spieltag.datum;
     event.start = DateTime.fromSQL(spieltag.datum).toLocal().toJSDate();
@@ -59,12 +81,16 @@ export class Spieltag {
     event.enddateStr = event.endDatetime.toSQL({
       includeOffset: false,
     });
-    event.mannschaft = spieltag.mannschaft;
     event.details = "Spiel: " + spieltag.heim + " : " + spieltag.gast;
     event.person = spieltag.person;
     event.weekEndRow = spieltag.weekEndRow;
     event.weekEndText = spieltag.weekEndText;
     event.allDay = false;
+    if (spieltag.mannschaft.indexOf("SVD 3") > -1) {
+      event.orte = [ORTE[1]];
+    } else {
+      event.orte = [ORTE[2]];
+    }
     return event;
   }
 

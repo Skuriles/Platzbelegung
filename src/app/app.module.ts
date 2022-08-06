@@ -13,6 +13,9 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { LayoutModule } from "@angular/cdk/layout";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatSelectModule } from "@angular/material/select";
 
 import { StartComponent } from "./app.component";
 
@@ -33,6 +36,9 @@ import { adapterFactory } from "angular-calendar/date-adapters/date-fns";
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
+import { MAT_DATE_LOCALE } from "@angular/material/core";
+import { MatDateFnsModule } from "@angular/material-date-fns-adapter";
+import { de } from "date-fns/locale";
 
 registerLocaleData(localeDe, "de-DE", localeDeExtra);
 
@@ -63,13 +69,22 @@ registerLocaleData(localeDe, "de-DE", localeDeExtra);
     MatMenuModule,
     MatFormFieldModule,
     MatDialogModule,
+    MatDateFnsModule,
+    MatCheckboxModule,
     LuxonModule,
+    MatDatepickerModule,
+    MatSelectModule,
     CalendarModule.forRoot({
       provide: DateAdapter,
       useFactory: adapterFactory,
     }),
   ],
-  providers: [HttpService, LoginService],
+  providers: [
+    HttpService,
+    LoginService,
+
+    { provide: MAT_DATE_LOCALE, useValue: de },
+  ],
   bootstrap: [StartComponent],
 })
 export class AppModule {}

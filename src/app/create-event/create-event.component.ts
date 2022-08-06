@@ -1,6 +1,6 @@
-import { Component, Inject, OnInit } from "@angular/core";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { Component, OnInit } from "@angular/core";
 import { DateTime } from "luxon";
+import { ORTE } from "../classes/orte";
 import { SvdEvent } from "../classes/svdEvent";
 
 @Component({
@@ -10,6 +10,8 @@ import { SvdEvent } from "../classes/svdEvent";
 })
 export class CreateEventComponent implements OnInit {
   public event: SvdEvent;
+  dateFormat = "yyyy-MM-ddTHH:mm";
+  public orte = ORTE;
   constructor() {
     this.event = new SvdEvent();
     this.event.start = DateTime.local().toJSDate();

@@ -32,7 +32,7 @@
     <button
       mat-mini-fab
       color="primary"
-      (click)="newGame()"
+      (click)="newEvent()"
       *ngIf="loginService.loggedIn && adminBtn"
       class="addbtn"
     >
@@ -174,7 +174,7 @@
           aria-hidden="false"
           aria-label="Edit Icon"
           (click)="edit(element)"
-          *ngIf="!element.weekEndRow"
+          *ngIf="!element.weekEndRow && !element.isGame"
           >edit</mat-icon
         >
       </td>

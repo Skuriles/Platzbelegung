@@ -24,17 +24,17 @@ add_action('rest_api_init', function () {
         'callback' => 'get_all_svdapi_games',
     ));
 
-    register_rest_route('svd_platzbelegung/v1', '/saveGame', array(
+    register_rest_route('svd_platzbelegung/v1', '/saveEvent', array(
         'methods' => 'POST',
         'callback' => 'save_svdapi_event',
     ));
 
-    register_rest_route('svd_platzbelegung/v1', '/addGame', array(
+    register_rest_route('svd_platzbelegung/v1', '/addEvent', array(
         'methods' => 'POST',
         'callback' => 'insert_svdapi_event',
     ));
 
-    register_rest_route('svd_platzbelegung/v1', '/deleteGame/(?P<id>\d+)', array(
+    register_rest_route('svd_platzbelegung/v1', '/deleteEvent/(?P<id>\d+)', array(
         'methods' => 'POST',
         'callback' => 'remove_svdapi_event',
     ));
@@ -74,6 +74,7 @@ function init_svd_platzbelegung_api_database()
       details text NOT NULL,
       allDayPhp boolean NOT NULL default 0,
       person text,
+      ortePhp text,
       PRIMARY KEY  (id)
     ) $charset_collate;";
 
@@ -110,6 +111,7 @@ function save_svdapi_event(WP_REST_Request $request)
     $person = sanitize_text_field($ele["person"]);
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
+    $orte = sanitize_text_field($ele["ortePhp"]);
     $result = $wpdb->update(
         $table_name,
         array(
@@ -119,6 +121,7 @@ function save_svdapi_event(WP_REST_Request $request)
             'person' => $person,
             'details' => $details,
             'allDayPhp' => $allday,
+            'ortePhp' => $orte,
         ),
         array('id' => $ele["id"]));
     return $result;
@@ -127,6 +130,7 @@ function save_svdapi_event(WP_REST_Request $request)
 function insert_svdapi_event(WP_REST_Request $request)
 {
     global $wpdb;
+    $wpdb->show_errors();
 
     $table_name = $wpdb->prefix . svdPlatzbelegungTable;
     $result = $request->get_json_params();
@@ -137,6 +141,7 @@ function insert_svdapi_event(WP_REST_Request $request)
     $person = sanitize_text_field($ele["person"]);
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
+    $orte = sanitize_text_field($ele["ortePhp"]);
     $result = $wpdb->insert(
         $table_name,
         array(
@@ -146,8 +151,11 @@ function insert_svdapi_event(WP_REST_Request $request)
             'person' => $person,
             'details' => $details,
             'allDayPhp' => $allday,
-        ),
+            'ortePhp' => $orte,
+        )
     );
+
+    //return $wpdb->print_error();
     return $result;
 }
 
