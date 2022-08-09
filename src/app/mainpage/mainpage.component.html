@@ -135,13 +135,10 @@
     </ng-container>
 
     <ng-container matColumnDef="mannschaft">
-      <th mat-header-cell *matHeaderCellDef>Mannschaft</th>
+      <th mat-header-cell *matHeaderCellDef>Titel</th>
       <td mat-cell *matCellDef="let element">
-        <div class="infoText" *ngIf="!element.weekEndRow && !isMobileScreen">
-          {{ element.mannschaft }}
-        </div>
-        <div class="infoText" *ngIf="!element.weekEndRow && isMobileScreen">
-          {{ element.mannschaftShort }}
+        <div class="infoText" *ngIf="!element.weekEndRow">
+          {{ element.title }}
         </div>
         <div *ngIf="!element.weekEndRow && isMobileScreen">
           <mat-icon
@@ -161,7 +158,7 @@
     </ng-container>
 
     <ng-container matColumnDef="person">
-      <th mat-header-cell *matHeaderCellDef>Person</th>
+      <th mat-header-cell *matHeaderCellDef>Ansprechpartner</th>
       <td mat-cell *matCellDef="let element">{{ element.person }}</td>
     </ng-container>
 
@@ -189,7 +186,7 @@
           aria-hidden="false"
           aria-label="delete Icon"
           (click)="delete(element)"
-          *ngIf="!element.weekEndRow"
+          *ngIf="!element.weekEndRow && !element.isGame"
           >delete</mat-icon
         >
       </td>

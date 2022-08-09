@@ -16,6 +16,7 @@ import { LayoutModule } from "@angular/cdk/layout";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatSelectModule } from "@angular/material/select";
+import { MatChipsModule } from "@angular/material/chips";
 
 import { StartComponent } from "./app.component";
 
@@ -74,6 +75,7 @@ registerLocaleData(localeDe, "de-DE", localeDeExtra);
     LuxonModule,
     MatDatepickerModule,
     MatSelectModule,
+    MatChipsModule,
     CalendarModule.forRoot({
       provide: DateAdapter,
       useFactory: adapterFactory,

@@ -59,6 +59,35 @@
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
       </div>
+      <section class="example-section">
+        <mat-checkbox
+          class="example-margin"
+          [(ngModel)]="event.repeats.repeat"
+          name="repeatCb"
+          >Wiederholt sich?</mat-checkbox
+        >
+      </section>
+      <div *ngIf="event.repeats?.repeat">
+        <mat-label>Wochentage</mat-label>
+        <mat-chip-list
+          #chipList
+          aria-label="Wochentage"
+          multiple
+          selectable
+          name="weekdays"
+          [selected]="selected"
+        >
+          <mat-chip
+            #c="matChip"
+            *ngFor="let day of weekdays"
+            (click)="toggleSelection(c)"
+            [selected]="event.repeats.customDays.indexOf(c.value) > -1"
+            [value]="day"
+          >
+            {{ day }}
+          </mat-chip>
+        </mat-chip-list>
+      </div>
       <mat-form-field class="example-full-width">
         <mat-label>Titel</mat-label>
         <input

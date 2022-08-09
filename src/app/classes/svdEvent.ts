@@ -28,6 +28,7 @@ export class SvdEvent implements CalendarEvent {
   public orte: string[] = [];
   public ortePhp: string = "";
   public isGame = false;
+  public repeats: RepeatType = new RepeatType();
 
   public createFrom?(element: SvdEvent) {
     this.id = element.id;
@@ -47,7 +48,12 @@ export class SvdEvent implements CalendarEvent {
     this.orte = this.parseOrte(element.ortePhp);
     this.ortePhp = element.ortePhp;
     this.isGame = element.isGame;
+    if (element.repeats) {
+      this.repeats = new RepeatType();
+      this.repeats.createFrom(element.repeats);
+    }
   }
+
   parseOrte(ortePhp: string): string[] {
     ortePhp = ortePhp.replace("[", "");
     ortePhp = ortePhp.replace("]", "");
@@ -123,3 +129,24 @@ export class Spieltag {
     return tokens[0];
   }
 }
+
+export class RepeatType {
+  createFrom(repeats: RepeatType) {
+    this.baseId = repeats.baseId;
+    this.repeat = repeats.repeat;
+    this.customDay = repeats.customDay;
+  }
+  baseId: number;
+  repeat: boolean;
+  customDay: string[] = [];
+}
+
+export const Weekdays = [
+  "Montag",
+  "Dienstag",
+  "Mittwoch",
+  "Donnerstag",
+  "Freitag",
+  "Samstag",
+  "Sonntag",
+];

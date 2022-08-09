@@ -75,6 +75,7 @@ function init_svd_platzbelegung_api_database()
       allDayPhp boolean NOT NULL default 0,
       person text,
       ortePhp text,
+      repeats JSON,
       PRIMARY KEY  (id)
     ) $charset_collate;";
 
@@ -112,6 +113,7 @@ function save_svdapi_event(WP_REST_Request $request)
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
     $orte = sanitize_text_field($ele["ortePhp"]);
+    $repeats = json_decode($ele["repeats"], true);
     $result = $wpdb->update(
         $table_name,
         array(
@@ -122,6 +124,7 @@ function save_svdapi_event(WP_REST_Request $request)
             'details' => $details,
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
+            'repeats' => $repeats,
         ),
         array('id' => $ele["id"]));
     return $result;
@@ -142,6 +145,8 @@ function insert_svdapi_event(WP_REST_Request $request)
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
     $orte = sanitize_text_field($ele["ortePhp"]);
+    $repeats = sanitize_text_field(json_decode($ele["repeats"], true));
+    return $repeats;
     $result = $wpdb->insert(
         $table_name,
         array(
@@ -152,10 +157,11 @@ function insert_svdapi_event(WP_REST_Request $request)
             'details' => $details,
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
+            'repeats' => $repeats,
         )
     );
 
-    //return $wpdb->print_error();
+    // return $wpdb->print_error();
     return $result;
 }
 
