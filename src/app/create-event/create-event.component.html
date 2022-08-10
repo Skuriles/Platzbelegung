@@ -62,30 +62,44 @@
       <section class="example-section">
         <mat-checkbox
           class="example-margin"
-          [(ngModel)]="event.repeats.repeat"
+          [(ngModel)]="event.repeats"
           name="repeatCb"
           >Wiederholt sich?</mat-checkbox
         >
       </section>
-      <div *ngIf="event.repeats?.repeat">
-        <mat-label>Wochentage</mat-label>
-        <mat-chip-list
-          #chipList
-          aria-label="Wochentage"
-          multiple
-          selectable
-          name="weekdays"
-          [selected]="selected"
-        >
-          <mat-chip
-            #c="matChip"
-            *ngFor="let day of weekdays"
-            (click)="toggleSelection(c)"
-            [value]="day"
+      <div *ngIf="event.repeats">
+        <section>
+          <mat-form-field class="example-full-width" appearance="fill">
+            <mat-label>Wiederholen bis</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker2"
+              [(ngModel)]="event.repeatsEndDate"
+            />
+            <mat-hint>MM.DD.YYYY</mat-hint>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+        </section>
+        <section>
+          <mat-label>Wochentage</mat-label>
+          <mat-chip-list
+            #chipList
+            aria-label="Wochentage"
+            multiple
+            selectable
+            name="weekdays"
+            [selected]="selected"
           >
-            {{ day }}
-          </mat-chip>
-        </mat-chip-list>
+            <mat-chip
+              #c="matChip"
+              *ngFor="let day of weekdays"
+              (click)="toggleSelection(c)"
+              [value]="day"
+            >
+              {{ day }}
+            </mat-chip>
+          </mat-chip-list>
+        </section>
       </div>
       <mat-form-field class="example-full-width">
         <mat-label>Titel</mat-label>

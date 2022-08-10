@@ -31,10 +31,10 @@ export class CreateEventComponent implements OnInit {
   toggleSelection(chip: MatChip) {
     chip.toggleSelected();
     if (chip.selected) {
-      this.event.repeats.customDay.push(chip.value);
+      this.event.customDays.push(chip.value);
     } else {
-      this.event.repeats.customDay.splice(
-        this.event.repeats.customDay.indexOf(chip.value),
+      this.event.customDays.splice(
+        this.event.customDays.indexOf(chip.value),
         1
       );
     }

@@ -245,6 +245,10 @@ export class MainpageComponent implements OnInit {
         element.enddateStr = DateTime.fromJSDate(element.end).toSQL({
           includeOffset: false,
         });
+
+        element.repeatsEnd = DateTime.fromJSDate(element.repeatsEndDate).toSQL({
+          includeOffset: false,
+        });
         this.saveEvent(element);
       } else {
         // nothing to do
@@ -290,7 +294,9 @@ export class MainpageComponent implements OnInit {
 
   private saveEvent(element: SvdEvent) {
     element.allDayPhp = element.allDay ? "1" : "0";
-    element.setOrte();
+    element.repeatsPhp = element.repeats ? "1" : "0";
+    element.ortePhp = element.setTokens(element.orte);
+    element.customDaysPhp = element.setTokens(element.customDays);
     this.httpService.saveEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {
@@ -308,7 +314,12 @@ export class MainpageComponent implements OnInit {
 
   private addEvent(element: SvdEvent) {
     element.allDayPhp = element.allDay ? "1" : "0";
-    element.setOrte();
+    element.repeatsPhp = element.repeats ? "1" : "0";
+    element.setTokens(element.orte);
+    element.setTokens(element.customDays);
+    element.repeatsEnd = DateTime.fromJSDate(element.repeatsEndDate).toSQL({
+      includeOffset: false,
+    });
     this.httpService.addEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: SVD Platzbelegung API
  */
@@ -75,7 +76,10 @@ function init_svd_platzbelegung_api_database()
       allDayPhp boolean NOT NULL default 0,
       person text,
       ortePhp text,
-      repeats JSON,
+      repeats boolean NOT NULL default 0,
+      repeatsEnd dateTime,
+      baseId int,
+      customDaysPhp text,
       PRIMARY KEY  (id)
     ) $charset_collate;";
 
@@ -113,7 +117,10 @@ function save_svdapi_event(WP_REST_Request $request)
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
     $orte = sanitize_text_field($ele["ortePhp"]);
-    $repeats = json_decode($ele["repeats"], true);
+    $repeats = sanitize_text_field($ele["repeatsPhp"]);
+    $repeatsEnd = sanitize_text_field($ele["repeatsEnd"]);
+    $baseId = sanitize_text_field($ele["baseId"]);
+    $customDaysPhp = sanitize_text_field($ele["customDaysPhp"]);
     $result = $wpdb->update(
         $table_name,
         array(
@@ -125,8 +132,12 @@ function save_svdapi_event(WP_REST_Request $request)
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
             'repeats' => $repeats,
+            'repeatsEnd' => $repeatsEnd,
+            'baseId' => $baseId,
+            'customDaysPhp' => $customDaysPhp,
         ),
-        array('id' => $ele["id"]));
+        array('id' => $ele["id"])
+    );
     return $result;
 }
 
@@ -145,8 +156,9 @@ function insert_svdapi_event(WP_REST_Request $request)
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
     $orte = sanitize_text_field($ele["ortePhp"]);
-    $repeats = sanitize_text_field(json_decode($ele["repeats"], true));
-    return $repeats;
+    $repeats = sanitize_text_field($ele["repeatsPhp"]);
+    $repeatsEnd = sanitize_text_field($ele["repeatsEnd"]);
+    $customDaysPhp = sanitize_text_field($ele["customDaysPhp"]);
     $result = $wpdb->insert(
         $table_name,
         array(
@@ -158,10 +170,88 @@ function insert_svdapi_event(WP_REST_Request $request)
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
             'repeats' => $repeats,
+            'repeatsEnd' => $repeatsEnd,
+            'customDaysPhp' => $customDaysPhp,
         )
     );
 
-    // return $wpdb->print_error();
+    if ($repeats == "1") {
+        $weeks = datediffInWeeks($startdate, $repeatsEnd);
+        $start = new DateTime($startdate);
+        $day = $start->format('N');
+        $customDays = $ele["customDays"];
+        $repeatDays = getWeekDayOffsets($day, $customDays);
+        $end = new DateTime($enddate);
+        for ($i = 0; $i < $weeks; $i++) {
+            for ($j = 0; $j < $repeatDays; $j++) {
+                $offset = ($i * 7) + $repeatDays[$j];
+                $newStartDate = $start->add(new DateInterval('P' . $offset . 'D'));
+                $newEndDate = $end->add(new DateInterval('P' . $offset . 'D'));
+                if ($newStartDate < new DateTime($repeatsEnd)) {
+                    $wpdb->insert(
+                        $table_name,
+                        array(
+                            'title' => $title,
+                            'startdateStr' => $newStartDate,
+                            'enddateStr' => $newEndDate,
+                            'person' => $person,
+                            'details' => $details,
+                            'allDayPhp' => $allday,
+                            'ortePhp' => $orte,
+                            'repeats' => "0",
+                            'baseId' => $result,
+                        )
+                    );
+                }
+            }
+        }
+        // return $wpdb->print_error();
+
+    }
+    return $result;
+}
+
+function datediffInWeeks($date1, $date2)
+{
+    $first = new DateTime($date1);
+    $second = new DateTime($date2);
+    return floor($first->diff($second)->days / 7);
+}
+
+function getWeekDayOffsets($day, $customDays)
+{
+    $result = array();
+
+    $dayInt = intval($day);
+    foreach ($customDays as $element) {
+        switch ($element) {
+            case 'Sonntag':
+                $result[] = $dayInt - 0;
+                break;
+            case 'Montag':
+                $result[] = $dayInt - 1;
+                break;
+            case 'Dienstag':
+                $result[] = $dayInt - 2;
+                break;
+            case 'Mittwoch':
+                $result[] = $dayInt - 3;
+                break;
+            case 'Donnerstag':
+                $result[] = $dayInt - 4;
+                break;
+            case 'Freitag':
+                $result[] = $dayInt - 5;
+                break;
+            case 'Samstag':
+                $result[] = $dayInt - 6;
+                break;
+
+            default:
+                break;
+        }
+    }
+    sort($result);
     return $result;
 }
 

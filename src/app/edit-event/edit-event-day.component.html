@@ -62,12 +62,12 @@
       <section class="example-section">
         <mat-checkbox
           class="example-margin"
-          [(ngModel)]="event.repeats.repeat"
+          [(ngModel)]="event.repeats"
           name="repeatCb"
           >Wiederholt sich?</mat-checkbox
         >
       </section>
-      <div *ngIf="event.repeats?.repeat">
+      <div *ngIf="event.repeats">
         <mat-label>Wochentage</mat-label>
         <mat-chip-list
           #chipList
@@ -81,7 +81,7 @@
             #c="matChip"
             *ngFor="let day of weekdays"
             (click)="toggleSelection(c)"
-            [selected]="event.repeats.customDays.indexOf(c.value) > -1"
+            [selected]="event.customDays.indexOf(c.value) > -1"
             [value]="day"
           >
             {{ day }}

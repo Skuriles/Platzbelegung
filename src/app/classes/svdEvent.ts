@@ -28,7 +28,13 @@ export class SvdEvent implements CalendarEvent {
   public orte: string[] = [];
   public ortePhp: string = "";
   public isGame = false;
-  public repeats: RepeatType = new RepeatType();
+  public repeats: boolean;
+  public repeatsPhp: string;
+  public repeatsEndDate: Date;
+  public repeatsEnd: string;
+  public baseId: number;
+  public customDays: string[] = [];
+  public customDaysPhp: string;
 
   public createFrom?(element: SvdEvent) {
     this.id = element.id;
@@ -45,28 +51,35 @@ export class SvdEvent implements CalendarEvent {
     this.weekEndText = element.weekEndText;
     this.allDay = element.allDayPhp === "1" ? true : false;
     this.allDayPhp = element.allDayPhp;
-    this.orte = this.parseOrte(element.ortePhp);
+    this.orte = this.parseTokens(element.ortePhp);
     this.ortePhp = element.ortePhp;
     this.isGame = element.isGame;
-    if (element.repeats) {
-      this.repeats = new RepeatType();
-      this.repeats.createFrom(element.repeats);
+    this.repeats = element.repeatsPhp === "1" ? true : false;
+    if (this.repeats) {
+      this.repeatsEndDate = DateTime.fromSQL(element.repeatsEnd)
+        .toLocal()
+        .toJSDate();
+      this.customDays = this.parseTokens(element.customDaysPhp);
+      this.baseId = element.baseId;
+    } else {
+      this.customDays = [];
     }
   }
 
-  parseOrte(ortePhp: string): string[] {
+  parseTokens(ortePhp: string): string[] {
     ortePhp = ortePhp.replace("[", "");
     ortePhp = ortePhp.replace("]", "");
     const tokens = ortePhp.split(",");
     return tokens;
   }
 
-  setOrte(): void {
-    for (const ort of this.orte) {
-      this.ortePhp += ort;
-      this.ortePhp += ",";
+  setTokens(orte: string[]): string {
+    let result: string = "";
+    for (const ort of orte) {
+      result += ort;
+      result += ",";
     }
-    this.ortePhp = this.ortePhp.slice(0, -1);
+    return result.slice(0, -1);
   }
 }
 
