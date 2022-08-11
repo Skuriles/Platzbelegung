@@ -75,6 +75,12 @@ export class HttpService {
     return this.postAuthRequest(nodeUrl, null);
   }
 
+  public deleteAllEvent(id: number) {
+    const nodeUrl =
+      this.apiPrefix + "svd_platzbelegung/v1/deleteEventAll/" + id;
+    return this.postAuthRequest(nodeUrl, null);
+  }
+
   // public uploadCsv(files: File[]) {
   //   const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/uploadCsv";
   //   return this.postAuthUploadRequest(nodeUrl, files);

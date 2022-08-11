@@ -20,6 +20,9 @@ export class EditEventComponent implements OnInit {
     this.event = data;
     this.event.startdateStr = DateTime.fromJSDate(this.event.start).toISO();
     this.event.enddateStr = DateTime.fromJSDate(this.event.end).toISO();
+    this.event.repeatsEnd = DateTime.fromJSDate(
+      this.event.repeatsEndDate
+    ).toISO();
   }
 
   ngOnInit(): void {}

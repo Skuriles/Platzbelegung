@@ -24,6 +24,10 @@ export class CreateEventComponent implements OnInit {
     this.event.end = DateTime.local().toJSDate();
     this.event.endDatetime = DateTime.local();
     this.event.enddateStr = DateTime.fromJSDate(this.event.end).toISO();
+    this.event.repeatsEndDate = new Date();
+    this.event.repeatsEnd = DateTime.fromJSDate(
+      this.event.repeatsEndDate
+    ).toISO();
   }
 
   ngOnInit(): void {}

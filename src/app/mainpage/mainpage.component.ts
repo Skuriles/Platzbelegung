@@ -35,6 +35,7 @@ import {
 } from "date-fns";
 import { CustomEventTitleFormatterService } from "../services/custom-event-title-formatter.service";
 import { Subject } from "rxjs";
+import { ConfirmBoxRepeatComponent } from "../confirm-box-repeat/confirm-box-repeat.component";
 
 @Component({
   selector: "app-mainpage",
@@ -269,7 +270,7 @@ export class MainpageComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
-        this.deleteEvent(element.id as number);
+        this.deleteEvent(element);
       }
     });
   }
@@ -315,8 +316,8 @@ export class MainpageComponent implements OnInit {
   private addEvent(element: SvdEvent) {
     element.allDayPhp = element.allDay ? "1" : "0";
     element.repeatsPhp = element.repeats ? "1" : "0";
-    element.setTokens(element.orte);
-    element.setTokens(element.customDays);
+    element.ortePhp = element.setTokens(element.orte);
+    element.customDaysPhp = element.setTokens(element.customDays);
     element.repeatsEnd = DateTime.fromJSDate(element.repeatsEndDate).toSQL({
       includeOffset: false,
     });
@@ -335,8 +336,12 @@ export class MainpageComponent implements OnInit {
     );
   }
 
-  private deleteEvent(id: number) {
-    this.httpService.deleteEvent(id).subscribe(
+  private deleteEvent(event: SvdEvent) {
+    if (event.repeats || event.baseId) {
+      this.handleRepeateDelete(event);
+      return;
+    }
+    this.httpService.deleteEvent(event.id as number).subscribe(
       (saved: boolean) => {
         if (saved) {
           this.openSnackBar("Gelöscht", "Ok");
@@ -349,6 +354,40 @@ export class MainpageComponent implements OnInit {
         this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
       }
     );
+  }
+
+  deleteAllEvents(event: SvdEvent) {
+    let id = event.id;
+    if (event.baseId) {
+      id = event.baseId;
+    }
+    this.httpService.deleteAllEvent(id as number).subscribe(
+      (saved: boolean) => {
+        if (saved) {
+          this.openSnackBar("Alle Gelöscht", "Ok");
+        } else {
+          this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
+        }
+        this.getAllEvents();
+      },
+      (err) => {
+        this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
+      }
+    );
+  }
+
+  handleRepeateDelete(event: SvdEvent) {
+    const dialogRef = this.dialog.open(ConfirmBoxRepeatComponent, {
+      data: event,
+    });
+
+    dialogRef.afterClosed().subscribe((result: SvdEvent | string) => {
+      if (result === "all") {
+        this.deleteAllEvents(event);
+      } else if (result) {
+        this.deleteEvent(event);
+      }
+    });
   }
 
   public login() {

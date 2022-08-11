@@ -40,6 +40,7 @@ import localeDeExtra from "@angular/common/locales/extra/de";
 import { MAT_DATE_LOCALE } from "@angular/material/core";
 import { MatDateFnsModule } from "@angular/material-date-fns-adapter";
 import { de } from "date-fns/locale";
+import { ConfirmBoxRepeatComponent } from "./confirm-box-repeat/confirm-box-repeat.component";
 
 registerLocaleData(localeDe, "de-DE", localeDeExtra);
 
@@ -53,6 +54,7 @@ registerLocaleData(localeDe, "de-DE", localeDeExtra);
     CreateEventComponent,
     UploadCsvComponent,
     InfoEventComponent,
+    ConfirmBoxRepeatComponent,
   ],
   imports: [
     BrowserModule,

@@ -68,6 +68,23 @@
         >
       </section>
       <div *ngIf="event.repeats">
+        <section>
+          <mat-form-field class="example-full-width" appearance="fill">
+            <mat-label>Wiederholen bis</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker2"
+              [(ngModel)]="event.repeatsEndDate"
+              name="repeatend"
+            />
+            <mat-hint>MM.DD.YYYY</mat-hint>
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker2"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+        </section>
         <mat-label>Wochentage</mat-label>
         <mat-chip-list
           #chipList

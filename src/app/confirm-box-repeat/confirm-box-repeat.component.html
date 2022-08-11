@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Alle oder nur dieses Event löschen?</h2>
+<mat-dialog-content class="mat-typography">
+  <span>Dieses Event ist Teil eines sich wiederholenden Events</span><br />
+  <div class="mat-body-strong">
+    Spiel: {{ event.startDatetime | date: "dd-MM-yyyy HH:mm" }}<br />
+    {{ event.title }} - {{ event.details }}
+  </div>
+  <br />
+  <div>
+    Möchtest du ALLE Events dieser Reihe löschen oder nur dieses an diesem
+    Termin?
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+  <button
+    mat-flat-button
+    color="warn"
+    [mat-dialog-close]="event"
+    cdkFocusInitial
+  >
+    Nur dieses löschen
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    mat-dialog-close="all"
+    cdkFocusInitial
+  >
+    ALLE löschen!
+  </button>
+</mat-dialog-actions>

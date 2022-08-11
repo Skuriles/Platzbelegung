@@ -60,10 +60,10 @@ export class SvdEvent implements CalendarEvent {
         .toLocal()
         .toJSDate();
       this.customDays = this.parseTokens(element.customDaysPhp);
-      this.baseId = element.baseId;
     } else {
       this.customDays = [];
     }
+    this.baseId = element.baseId;
   }
 
   parseTokens(ortePhp: string): string[] {

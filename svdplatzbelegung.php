@@ -40,6 +40,11 @@ add_action('rest_api_init', function () {
         'callback' => 'remove_svdapi_event',
     ));
 
+    register_rest_route('svd_platzbelegung/v1', '/deleteEventAll/(?P<id>\d+)', array(
+        'methods' => 'POST',
+        'callback' => 'remove_svdapi_event_all',
+    ));
+
     // register_rest_route('svd_platzbelegung/v1', '/uploadCsv', array(
     //     'methods' => 'POST',
     //     'callback' => 'import_svdapi_game',
@@ -174,32 +179,45 @@ function insert_svdapi_event(WP_REST_Request $request)
             'customDaysPhp' => $customDaysPhp,
         )
     );
-
+    $lastid = $wpdb->insert_id;
     if ($repeats == "1") {
         $weeks = datediffInWeeks($startdate, $repeatsEnd);
         $start = new DateTime($startdate);
         $day = $start->format('N');
         $customDays = $ele["customDays"];
         $repeatDays = getWeekDayOffsets($day, $customDays);
-        $end = new DateTime($enddate);
-        for ($i = 0; $i < $weeks; $i++) {
-            for ($j = 0; $j < $repeatDays; $j++) {
+        // $test = array();
+        for ($i = 1; $i <= $weeks; $i++) {
+            for ($j = 0; $j < count($repeatDays); $j++) {
+                $start = new DateTime($startdate);
+                $end = new DateTime($enddate);
                 $offset = ($i * 7) + $repeatDays[$j];
                 $newStartDate = $start->add(new DateInterval('P' . $offset . 'D'));
                 $newEndDate = $end->add(new DateInterval('P' . $offset . 'D'));
-                if ($newStartDate < new DateTime($repeatsEnd)) {
+                // array_push($test, array(
+                //     'title' => $title,
+                //     'startdateStr' => $newStartDate->format('Y-m-d H:i:s'),
+                //     'enddateStr' => $newEndDate->format('Y-m-d H:i:s'),
+                //     'person' => $person,
+                //     'details' => $details,
+                //     'allDayPhp' => $allday,
+                //     'ortePhp' => $orte,
+                //     'repeats' => "0",
+                //     'baseId' => $lastid,
+                // ));
+                if ($newStartDate < new DateTime($repeatsEnd) && $newStartDate > new DateTime($startdate)) {
                     $wpdb->insert(
                         $table_name,
                         array(
                             'title' => $title,
-                            'startdateStr' => $newStartDate,
-                            'enddateStr' => $newEndDate,
+                            'startdateStr' => $newStartDate->format('Y-m-d H:i:s'),
+                            'enddateStr' => $newEndDate->format('Y-m-d H:i:s'),
                             'person' => $person,
                             'details' => $details,
                             'allDayPhp' => $allday,
                             'ortePhp' => $orte,
                             'repeats' => "0",
-                            'baseId' => $result,
+                            'baseId' => $lastid,
                         )
                     );
                 }
@@ -208,6 +226,7 @@ function insert_svdapi_event(WP_REST_Request $request)
         // return $wpdb->print_error();
 
     }
+    // return $test;
     return $result;
 }
 
@@ -226,25 +245,25 @@ function getWeekDayOffsets($day, $customDays)
     foreach ($customDays as $element) {
         switch ($element) {
             case 'Sonntag':
-                $result[] = $dayInt - 0;
+                array_push($result, 0 - $dayInt);
                 break;
             case 'Montag':
-                $result[] = $dayInt - 1;
+                array_push($result, 1 - $dayInt);
                 break;
             case 'Dienstag':
-                $result[] = $dayInt - 2;
+                array_push($result, 2 - $dayInt);
                 break;
             case 'Mittwoch':
-                $result[] = $dayInt - 3;
+                array_push($result, 3 - $dayInt);
                 break;
             case 'Donnerstag':
-                $result[] = $dayInt - 4;
+                array_push($result, 4 - $dayInt);
                 break;
             case 'Freitag':
-                $result[] = $dayInt - 5;
+                array_push($result, 5 - $dayInt);
                 break;
             case 'Samstag':
-                $result[] = $dayInt - 6;
+                array_push($result, 6 - $dayInt);
                 break;
 
             default:
@@ -265,5 +284,26 @@ function remove_svdapi_event($data)
             'id' => $data['id'],
         )
     );
+    return $result;
+}
+
+function remove_svdapi_event_all($data)
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . svdPlatzbelegungTable;
+    $result = $wpdb->delete(
+        $table_name,
+        array(
+            'id' => $data['id'],
+        )
+    );
+    if ($result) {
+        $result = $wpdb->delete(
+            $table_name,
+            array(
+                'baseId' => $data['id'],
+            )
+        );
+    }
     return $result;
 }
