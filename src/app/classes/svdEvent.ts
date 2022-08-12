@@ -35,6 +35,7 @@ export class SvdEvent implements CalendarEvent {
   public baseId: number;
   public customDays: string[] = [];
   public customDaysPhp: string;
+  public delete: boolean;
 
   public createFrom?(element: SvdEvent) {
     this.id = element.id;
@@ -51,19 +52,23 @@ export class SvdEvent implements CalendarEvent {
     this.weekEndText = element.weekEndText;
     this.allDay = element.allDayPhp === "1" ? true : false;
     this.allDayPhp = element.allDayPhp;
-    this.orte = this.parseTokens(element.ortePhp);
-    this.ortePhp = element.ortePhp;
     this.isGame = element.isGame;
+    if (!this.isGame) {
+      this.orte = this.parseTokens(element.ortePhp);
+      this.ortePhp = element.ortePhp;
+    }
     this.repeats = element.repeatsPhp === "1" ? true : false;
-    if (this.repeats) {
+    this.baseId = element.baseId;
+    if (this.repeats || this.baseId) {
       this.repeatsEndDate = DateTime.fromSQL(element.repeatsEnd)
         .toLocal()
         .toJSDate();
       this.customDays = this.parseTokens(element.customDaysPhp);
+      this.customDaysPhp = element.customDaysPhp;
     } else {
       this.customDays = [];
     }
-    this.baseId = element.baseId;
+    this.repeatsEnd = element.repeatsEnd;
   }
 
   parseTokens(ortePhp: string): string[] {

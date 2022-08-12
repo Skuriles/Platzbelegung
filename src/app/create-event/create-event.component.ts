@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { MatChip } from "@angular/material/chips";
+import { MatDialogRef } from "@angular/material/dialog";
 import { DateTime } from "luxon";
 import { ORTE } from "../classes/orte";
 import { SvdEvent, Weekdays } from "../classes/svdEvent";
@@ -16,7 +17,10 @@ export class CreateEventComponent implements OnInit {
   public weekdays = Weekdays;
   public selected: MatChip[];
   public orte = ORTE;
-  constructor() {
+  constructor(
+    private dialogRef: MatDialogRef<CreateEventComponent>,
+    private helperService: HelperService
+  ) {
     this.event = new SvdEvent();
     this.event.start = DateTime.local().toJSDate();
     this.event.startDatetime = DateTime.local();
@@ -41,6 +45,25 @@ export class CreateEventComponent implements OnInit {
         this.event.customDays.indexOf(chip.value),
         1
       );
+    }
+  }
+
+  apply() {
+    const result = this.helperService.handleSaveData(this.event);
+    if (!result) {
+      return;
+    }
+    this.dialogRef.close(this.event);
+  }
+
+  startDateChanged(event: string) {
+    this.event.startdateStr = event;
+    if (
+      DateTime.fromISO(this.event.enddateStr) <
+      DateTime.fromISO(this.event.startdateStr)
+    ) {
+      this.event.endDatetime = DateTime.fromISO(this.event.startdateStr);
+      this.event.enddateStr = event;
     }
   }
 }

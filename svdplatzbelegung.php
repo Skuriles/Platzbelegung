@@ -81,7 +81,7 @@ function init_svd_platzbelegung_api_database()
       allDayPhp boolean NOT NULL default 0,
       person text,
       ortePhp text,
-      repeats boolean NOT NULL default 0,
+      repeatsPhp boolean NOT NULL default 0,
       repeatsEnd dateTime,
       baseId int,
       customDaysPhp text,
@@ -136,7 +136,7 @@ function save_svdapi_event(WP_REST_Request $request)
             'details' => $details,
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
-            'repeats' => $repeats,
+            'repeatsPhp' => $repeats,
             'repeatsEnd' => $repeatsEnd,
             'baseId' => $baseId,
             'customDaysPhp' => $customDaysPhp,
@@ -174,7 +174,7 @@ function insert_svdapi_event(WP_REST_Request $request)
             'details' => $details,
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
-            'repeats' => $repeats,
+            'repeatsPhp' => $repeats,
             'repeatsEnd' => $repeatsEnd,
             'customDaysPhp' => $customDaysPhp,
         )
@@ -202,7 +202,7 @@ function insert_svdapi_event(WP_REST_Request $request)
                 //     'details' => $details,
                 //     'allDayPhp' => $allday,
                 //     'ortePhp' => $orte,
-                //     'repeats' => "0",
+                //     'repeatsPhp' => "0",
                 //     'baseId' => $lastid,
                 // ));
                 if ($newStartDate < new DateTime($repeatsEnd) && $newStartDate > new DateTime($startdate)) {
@@ -216,8 +216,10 @@ function insert_svdapi_event(WP_REST_Request $request)
                             'details' => $details,
                             'allDayPhp' => $allday,
                             'ortePhp' => $orte,
-                            'repeats' => "0",
+                            'repeatsPhp' => "0",
                             'baseId' => $lastid,
+                            'repeatsEnd' => $repeatsEnd,
+                            'customDaysPhp' => $customDaysPhp,
                         )
                     );
                 }

@@ -1,9 +1,10 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MatChip } from "@angular/material/chips";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { DateTime } from "luxon";
 import { ORTE } from "../classes/orte";
 import { SvdEvent, Weekdays } from "../classes/svdEvent";
+import { HelperService } from "../services/helper.service";
 
 @Component({
   selector: "app-event-day",
@@ -16,7 +17,11 @@ export class EditEventComponent implements OnInit {
   public orte = ORTE;
   public weekdays = Weekdays;
   public selected: MatChip[];
-  constructor(@Inject(MAT_DIALOG_DATA) public data: SvdEvent) {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: SvdEvent,
+    public dialogRef: MatDialogRef<EditEventComponent>,
+    private helperService: HelperService
+  ) {
     this.event = data;
     this.event.startdateStr = DateTime.fromJSDate(this.event.start).toISO();
     this.event.enddateStr = DateTime.fromJSDate(this.event.end).toISO();
@@ -37,5 +42,29 @@ export class EditEventComponent implements OnInit {
         1
       );
     }
+  }
+
+  apply() {
+    const result = this.helperService.handleSaveData(this.event);
+    if (!result) {
+      return;
+    }
+    this.dialogRef.close(this.event);
+  }
+
+  startDateChanged(event: string) {
+    this.event.startdateStr = event;
+    if (
+      DateTime.fromISO(this.event.enddateStr) <
+      DateTime.fromISO(this.event.startdateStr)
+    ) {
+      this.event.endDatetime = DateTime.fromISO(this.event.startdateStr);
+      this.event.enddateStr = event;
+    }
+  }
+
+  delete() {
+    this.event.delete = true;
+    this.dialogRef.close(this.event);
   }
 }

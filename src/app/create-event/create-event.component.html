@@ -18,7 +18,7 @@
             type="datetime-local"
             placeholder="Start"
             [ngModel]="event.startDatetime | date: dateFormat"
-            (ngModelChange)="event.startdateStr = $event"
+            (ngModelChange)="startDateChanged($event)"
             name="start"
           />
         </mat-form-field>
@@ -117,12 +117,12 @@
       </mat-form-field>
       <mat-form-field class="example-full-width">
         <mat-label>Details</mat-label>
-        <input
+        <textarea
           matInput
           placeholder="Details"
           [(ngModel)]="event.details"
           name="details"
-        />
+        ></textarea>
       </mat-form-field>
       <mat-form-field appearance="fill">
         <mat-label>Gelände</mat-label>
@@ -146,12 +146,7 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Abbrechen</button>
-  <button
-    mat-flat-button
-    color="accent"
-    [mat-dialog-close]="event"
-    cdkFocusInitial
-  >
+  <button mat-flat-button color="accent" (click)="apply()" cdkFocusInitial>
     Speichern
   </button>
 </mat-dialog-actions>

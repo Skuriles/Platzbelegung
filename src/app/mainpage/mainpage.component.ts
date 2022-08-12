@@ -8,7 +8,6 @@ import { EditEventComponent } from "../edit-event/edit-event-day.component";
 import { LoginComponent } from "../login/login.component";
 import { HttpService } from "../services/http.service";
 import { LoginService } from "../services/login.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatTableDataSource } from "@angular/material/table";
 import { ConfirmBoxComponent } from "../confirm-box/confirm-box.component";
 import { UploadCsvComponent } from "../upload-csv/upload-csv.component";
@@ -23,19 +22,11 @@ import {
   CalendarEventTitleFormatter,
   CalendarView,
 } from "angular-calendar";
-import {
-  startOfDay,
-  endOfDay,
-  subDays,
-  addDays,
-  endOfMonth,
-  isSameDay,
-  isSameMonth,
-  addHours,
-} from "date-fns";
+import { isSameDay, isSameMonth } from "date-fns";
 import { CustomEventTitleFormatterService } from "../services/custom-event-title-formatter.service";
 import { Subject } from "rxjs";
 import { ConfirmBoxRepeatComponent } from "../confirm-box-repeat/confirm-box-repeat.component";
+import { HelperService } from "../services/helper.service";
 
 @Component({
   selector: "app-mainpage",
@@ -84,9 +75,9 @@ export class MainpageComponent implements OnInit {
     private httpService: HttpService,
     public dialog: MatDialog,
     public loginService: LoginService,
-    private snackBar: MatSnackBar,
     private breakpointObserver: BreakpointObserver,
-    private ngzone: NgZone
+    private ngzone: NgZone,
+    private helperService: HelperService
   ) {
     Settings.defaultLocale = "de";
     breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
@@ -147,6 +138,7 @@ export class MainpageComponent implements OnInit {
 
   handleEvent(action: string, event: CalendarEvent): void {
     this.edit(this.allEvents.find((e) => e.id === event.id));
+    this.closeOpenMonthViewDay();
   }
 
   private getAllEvents() {
@@ -235,21 +227,10 @@ export class MainpageComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: SvdEvent) => {
       if (result) {
-        element = result;
-        element.start = DateTime.fromISO(element.startdateStr).toJSDate();
-        element.startDatetime = DateTime.fromISO(element.startdateStr);
-        element.startdateStr = DateTime.fromJSDate(element.start).toSQL({
-          includeOffset: false,
-        });
-        element.end = DateTime.fromISO(element.enddateStr).toJSDate();
-        element.endDatetime = DateTime.fromISO(element.enddateStr);
-        element.enddateStr = DateTime.fromJSDate(element.end).toSQL({
-          includeOffset: false,
-        });
-
-        element.repeatsEnd = DateTime.fromJSDate(element.repeatsEndDate).toSQL({
-          includeOffset: false,
-        });
+        if (result.delete) {
+          this.delete(result);
+          return;
+        }
         this.saveEvent(element);
       } else {
         // nothing to do
@@ -272,6 +253,7 @@ export class MainpageComponent implements OnInit {
       if (result) {
         this.deleteEvent(element);
       }
+      element.delete = false;
     });
   }
 
@@ -294,44 +276,54 @@ export class MainpageComponent implements OnInit {
   }
 
   private saveEvent(element: SvdEvent) {
-    element.allDayPhp = element.allDay ? "1" : "0";
-    element.repeatsPhp = element.repeats ? "1" : "0";
-    element.ortePhp = element.setTokens(element.orte);
-    element.customDaysPhp = element.setTokens(element.customDays);
+    const result = this.helperService.handleSaveData(element);
+    if (!result) {
+      return;
+    }
+
     this.httpService.saveEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {
-          this.openSnackBar("Gespeichert", "Ok");
+          this.helperService.openSnackBar("Gespeichert", "Ok");
         } else {
-          this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
+          this.helperService.openSnackBar(
+            "Speichern fehlgeschlagen",
+            "Ok",
+            "errorSnack"
+          );
         }
         this.getAllEvents();
       },
       (err) => {
-        this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
+        this.helperService.openSnackBar(
+          "Speichern fehlgeschlagen",
+          "Ok",
+          "errorSnack"
+        );
       }
     );
   }
 
   private addEvent(element: SvdEvent) {
-    element.allDayPhp = element.allDay ? "1" : "0";
-    element.repeatsPhp = element.repeats ? "1" : "0";
-    element.ortePhp = element.setTokens(element.orte);
-    element.customDaysPhp = element.setTokens(element.customDays);
-    element.repeatsEnd = DateTime.fromJSDate(element.repeatsEndDate).toSQL({
-      includeOffset: false,
-    });
     this.httpService.addEvent(element).subscribe(
       (saved: boolean) => {
         if (saved) {
-          this.openSnackBar("Event angelegt", "Ok");
+          this.helperService.openSnackBar("Event angelegt", "Ok");
         } else {
-          this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
+          this.helperService.openSnackBar(
+            "Speichern fehlgeschlagen",
+            "Ok",
+            "errorSnack"
+          );
         }
         this.getAllEvents();
       },
       (err) => {
-        this.openSnackBar("Speichern fehlgeschlagen", "Ok", "errorSnack");
+        this.helperService.openSnackBar(
+          "Speichern fehlgeschlagen",
+          "Ok",
+          "errorSnack"
+        );
       }
     );
   }
@@ -344,14 +336,22 @@ export class MainpageComponent implements OnInit {
     this.httpService.deleteEvent(event.id as number).subscribe(
       (saved: boolean) => {
         if (saved) {
-          this.openSnackBar("Gelöscht", "Ok");
+          this.helperService.openSnackBar("Gelöscht", "Ok");
         } else {
-          this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
+          this.helperService.openSnackBar(
+            "Löschen fehlgeschlagen",
+            "Ok",
+            "errorSnack"
+          );
         }
         this.getAllEvents();
       },
       (err) => {
-        this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
+        this.helperService.openSnackBar(
+          "Löschen fehlgeschlagen",
+          "Ok",
+          "errorSnack"
+        );
       }
     );
   }
@@ -364,14 +364,22 @@ export class MainpageComponent implements OnInit {
     this.httpService.deleteAllEvent(id as number).subscribe(
       (saved: boolean) => {
         if (saved) {
-          this.openSnackBar("Alle Gelöscht", "Ok");
+          this.helperService.openSnackBar("Alle Gelöscht", "Ok");
         } else {
-          this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
+          this.helperService.openSnackBar(
+            "Löschen fehlgeschlagen",
+            "Ok",
+            "errorSnack"
+          );
         }
         this.getAllEvents();
       },
       (err) => {
-        this.openSnackBar("Löschen fehlgeschlagen", "Ok", "errorSnack");
+        this.helperService.openSnackBar(
+          "Löschen fehlgeschlagen",
+          "Ok",
+          "errorSnack"
+        );
       }
     );
   }
@@ -432,7 +440,7 @@ export class MainpageComponent implements OnInit {
         }
       },
       (err) => {
-        this.openSnackBar(
+        this.helperService.openSnackBar(
           "Fehler beim Einloggen - Bitte PW und Name prüfen",
           "Verstanden",
           "errorSnack"
@@ -479,12 +487,6 @@ export class MainpageComponent implements OnInit {
     }
     // a muss gleich b sein
     return 0;
-  }
-  private openSnackBar(text: string, btnText: string, cssClass: string = "") {
-    this.snackBar.open(text, btnText, {
-      duration: 3000,
-      panelClass: cssClass,
-    });
   }
 
   public setGui(isMobile: boolean) {
