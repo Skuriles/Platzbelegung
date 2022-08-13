@@ -174,18 +174,20 @@ function save_svdapi_event_all(WP_REST_Request $request)
         ),
         array('id' => $ele["id"])
     );
+    // return array('result' => $result, 'baseId' => $ele["baseId"], 'id' => $ele["id"], 'repeats' => $ele['repeats']);
     if ($result == 1 && $ele["baseId"] != null) {
+        $query = $wpdb->prepare(
+            "UPDATE $table_name SET
+            title=$title,
+            startdateStr=ADDTIME($startdateStr, $diffStart),
+            enddateStr=ADDTIME($startdateStr, $diffEnd),
+            person=$person,
+            details=$details,
+            allDayPhp=$allday,
+            ortePhp=$orte WHERE id=%d OR baseId=%d", array(intval($ele['baseId']), intval($ele['baseId']))
+        );
         $wpdb->query(
-            $wpdb->prepare(
-                "UPDATE $table_name SET
-                title=$title,
-                startdateStr=ADDTIME(startdateStr, $diffStart),
-                enddateStr=ADDTIME(startdateStr, $diffEnd),
-                person=$person,
-                details=$details,
-                allDayPhp=$allday,
-                ortePhp=$orte WHERE id='" . $ele['baseId'] . "' OR baseId='" . $ele['baseId'] . "'"
-            )
+            $query
         );
         // $result = $wpdb->update(
         //     $table_name,
@@ -214,18 +216,21 @@ function save_svdapi_event_all(WP_REST_Request $request)
         //     array('id' => $ele["baseId"])
         // );
     }
-    if ($result == 1 && $ele["baseId"] == null) {
-        $wpdb->query(
-            $wpdb->prepare(
-                "UPDATE $table_name SET
+    if ($result == 1 && $ele['repeats']) {
+        $query = $wpdb->prepare(
+            "UPDATE $table_name SET
             title=$title,
-            startdateStr=ADDTIME(startdateStr, $diffStart),
-            enddateStr=ADDTIME(startdateStr, $diffEnd),
+            startdateStr=ADDTIME($startdateStr, $diffStart),
+            enddateStr=ADDTIME($startdateStr, $diffEnd),
             person=$person,
             details=$details,
             allDayPhp=$allday,
-            ortePhp=$orte WHERE baseId='" . $ele['id'] . "'"
-            ));
+            ortePhp=$orte WHERE baseId=%d", intval($ele['id'])
+        );
+        // return $query;
+        $wpdb->query(
+            $query
+        );
         // $result = $wpdb->update(
         //     $table_name,
         //     array(
