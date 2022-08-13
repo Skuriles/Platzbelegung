@@ -13,16 +13,21 @@ import { HelperService } from "../services/helper.service";
 })
 export class EditEventComponent implements OnInit {
   public event: SvdEvent;
+  public oriEvent: SvdEvent;
   public dateFormat = "yyyy-MM-ddTHH:mm";
   public orte = ORTE;
   public weekdays = Weekdays;
   public selected: MatChip[];
+  public showHint: boolean;
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: SvdEvent,
     public dialogRef: MatDialogRef<EditEventComponent>,
     private helperService: HelperService
   ) {
+    this.oriEvent = new SvdEvent();
+    this.oriEvent.createFrom(data);
     this.event = data;
+    this.event.editSingle = false;
     this.event.startdateStr = DateTime.fromJSDate(this.event.start).toISO();
     this.event.enddateStr = DateTime.fromJSDate(this.event.end).toISO();
     this.event.repeatsEnd = DateTime.fromJSDate(
@@ -49,6 +54,7 @@ export class EditEventComponent implements OnInit {
     if (!result) {
       return;
     }
+    this.event.editSingle = this.showHint;
     this.dialogRef.close(this.event);
   }
 
@@ -60,6 +66,29 @@ export class EditEventComponent implements OnInit {
     ) {
       this.event.endDatetime = DateTime.fromISO(this.event.startdateStr);
       this.event.enddateStr = event;
+    }
+    this.checkRepeatDate();
+  }
+
+  endDateChanged(event: string) {
+    this.event.enddateStr = event;
+    this.checkRepeatDate();
+  }
+
+  private checkRepeatDate() {
+    this.showHint = false;
+    const end = DateTime.fromISO(this.event.enddateStr);
+    const start = DateTime.fromISO(this.event.startdateStr);
+    if (
+      (this.event.repeats || this.event.baseId) &&
+      (this.event.startDatetime.day != start.day ||
+        this.event.startDatetime.month != start.month ||
+        this.event.startDatetime.year != start.year ||
+        this.event.endDatetime.day != end.day ||
+        this.event.endDatetime.month != end.month ||
+        this.event.endDatetime.year != end.year)
+    ) {
+      this.showHint = true;
     }
   }
 

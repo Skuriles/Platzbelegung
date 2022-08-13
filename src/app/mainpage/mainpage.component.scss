@@ -1,8 +1,3 @@
-table {
-  width: 100%;
-  /* min-width: 500px; */
-}
-
 th.mat-header-cell:last-of-type,
 td.mat-cell:last-of-type,
 td.mat-footer-cell:last-of-type {
@@ -65,6 +60,11 @@ td.mat-footer-cell:last-of-type {
 
 .calendar-box {
   margin: 15px;
+
+  table {
+    width: calc(100% - 30px);
+    /* min-width: 500px; */
+  }
 }
 
 .calendar-box .example-button-row {
@@ -75,4 +75,12 @@ td.mat-footer-cell:last-of-type {
 
 .calendar-box .example-button-row .mat-button-base {
   margin: 8px 8px 8px 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 15px;
 }

@@ -66,4 +66,10 @@ export class CreateEventComponent implements OnInit {
       this.event.enddateStr = event;
     }
   }
+
+  allDayChanged(event: boolean) {
+    if (this.event.allDay) {
+      this.event.repeats = false;
+    }
+  }
 }

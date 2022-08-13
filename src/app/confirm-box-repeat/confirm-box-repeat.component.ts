@@ -9,6 +9,7 @@ import { SvdEvent } from "../classes/svdEvent";
 })
 export class ConfirmBoxRepeatComponent implements OnInit {
   public event: SvdEvent;
+  public edit = false;
   constructor(@Inject(MAT_DIALOG_DATA) public data: SvdEvent) {
     this.event = data;
   }

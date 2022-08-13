@@ -39,6 +39,14 @@
       <mat-icon>add</mat-icon>
     </button>
   </div>
+  <h3>Anmelden und auf Event im Kalender klicken um es zu bearbeiten</h3>
+  <h3>
+    Spiele können nur in der
+    <a href="https://sportheim.sv-deggenhausertal.de" target="_blank"
+      >Sportheimverwaltung</a
+    >
+    bearbeitet werden
+  </h3>
   <div class="calendar-box">
     <h2>{{ viewDate | calendarDate: view + "ViewTitle":"de-DE" }}</h2>
     <div class="example-button-row">
@@ -63,8 +71,21 @@
       >
         Nächster
       </button>
+      <mat-button-toggle-group
+        aria-label="toggle view"
+        [(ngModel)]="view"
+        appearance="legacy"
+      >
+        <mat-button-toggle value="month">Monat</mat-button-toggle>
+        <mat-button-toggle value="week">Woche</mat-button-toggle>
+        <mat-button-toggle value="day">Tag</mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
+  </div>
+
+  <div [ngSwitch]="view" class="calendar-box">
     <mwl-calendar-month-view
+      *ngSwitchCase="'month'"
       [viewDate]="viewDate"
       [events]="allEvents"
       [activeDayIsOpen]="activeDayIsOpen"
@@ -72,131 +93,171 @@
       (dayClicked)="dayClicked($event.day)"
       (eventClicked)="handleEvent('Clicked', $event.event)"
       (eventTimesChanged)="eventTimesChanged($event)"
+      [locale]="locale"
     >
     </mwl-calendar-month-view>
-  </div>
-  <div class="filter">
-    <mat-form-field>
-      <mat-label>Filter</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Suche - Datum mit 2020-10-24 Format"
-        #input
-      />
-    </mat-form-field>
-  </div>
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-    <ng-container matColumnDef="datum">
-      <th mat-header-cell *matHeaderCellDef>Datum</th>
-      <td
-        mat-cell
-        *matCellDef="let element"
-        [ngClass]="{ mobileDate: isMobileScreen }"
-      >
-        <span *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay">
-          {{
-            element.startDatetime
-              | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-          }}
-          Uhr
-        </span>
-        <span *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay">
-          {{ element.startDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
-        </span>
-        <span *ngIf="!element.weekEndRow && element.allDay">
-          {{ element.startDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
-        </span>
-        <span *ngIf="element.weekEndRow">
-          {{ element.weekEndText }}
-        </span>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="datumEnd">
-      <th mat-header-cell *matHeaderCellDef>Ende</th>
-      <td
-        mat-cell
-        *matCellDef="let element"
-        [ngClass]="{ mobileDate: isMobileScreen }"
-      >
-        <span *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay">
-          {{
-            element.endDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-          }}
-          Uhr
-        </span>
-        <span *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay">
-          {{ element.endDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
-        </span>
-        <span *ngIf="!element.weekEndRow && element.allDay">
-          {{ element.endDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
-        </span>
-      </td>
-    </ng-container>
+    <mwl-calendar-week-view
+      *ngSwitchCase="'week'"
+      [viewDate]="viewDate"
+      [events]="allEvents"
+      [refresh]="refresh"
+      (dayClicked)="dayClicked($event.day)"
+      (eventClicked)="handleEvent('Clicked', $event.event)"
+      (eventTimesChanged)="eventTimesChanged($event)"
+      [locale]="locale"
+    >
+    </mwl-calendar-week-view>
+    <mwl-calendar-day-view
+      *ngSwitchCase="'day'"
+      [viewDate]="viewDate"
+      [events]="allEvents"
+      [refresh]="refresh"
+      (dayClicked)="dayClicked($event.day)"
+      (eventClicked)="handleEvent('Clicked', $event.event)"
+      (eventTimesChanged)="eventTimesChanged($event)"
+      [locale]="locale"
+    >
+    </mwl-calendar-day-view>
 
-    <ng-container matColumnDef="mannschaft">
-      <th mat-header-cell *matHeaderCellDef>Titel</th>
-      <td mat-cell *matCellDef="let element">
-        <div class="infoText" *ngIf="!element.weekEndRow">
-          {{ element.title }}
-        </div>
-        <div *ngIf="!element.weekEndRow && isMobileScreen">
+    <h2>Nächste Events</h2>
+    <div class="filter calendar-box">
+      <mat-form-field>
+        <mat-label>Filter</mat-label>
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          placeholder="Suche - Datum mit 2020-10-24 Format"
+          #input
+        />
+      </mat-form-field>
+    </div>
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      class="mat-elevation-z8 calendar-box"
+    >
+      <ng-container matColumnDef="datum">
+        <th mat-header-cell *matHeaderCellDef>Datum</th>
+        <td
+          mat-cell
+          *matCellDef="let element"
+          [ngClass]="{ mobileDate: isMobileScreen }"
+        >
+          <span
+            *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay"
+          >
+            {{
+              element.startDatetime
+                | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+            }}
+            Uhr
+          </span>
+          <span
+            *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay"
+          >
+            {{ element.startDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
+          </span>
+          <span *ngIf="!element.weekEndRow && element.allDay">
+            {{ element.startDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
+          </span>
+          <span *ngIf="element.weekEndRow">
+            {{ element.weekEndText }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="datumEnd">
+        <th mat-header-cell *matHeaderCellDef>Ende</th>
+        <td
+          mat-cell
+          *matCellDef="let element"
+          [ngClass]="{ mobileDate: isMobileScreen }"
+        >
+          <span
+            *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay"
+          >
+            {{
+              element.endDatetime
+                | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+            }}
+            Uhr
+          </span>
+          <span
+            *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay"
+          >
+            {{ element.endDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
+          </span>
+          <span *ngIf="!element.weekEndRow && element.allDay">
+            {{ element.endDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="mannschaft">
+        <th mat-header-cell *matHeaderCellDef>Titel</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="infoText" *ngIf="!element.weekEndRow">
+            {{ element.title }}
+          </div>
+          <div *ngIf="!element.weekEndRow && isMobileScreen">
+            <mat-icon
+              aria-hidden="false"
+              aria-label="info Icon"
+              class="infoIcon"
+              (click)="showInfo(element)"
+              >info</mat-icon
+            >
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="details">
+        <th mat-header-cell *matHeaderCellDef>Details</th>
+        <td mat-cell *matCellDef="let element">{{ element.details }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="person">
+        <th mat-header-cell *matHeaderCellDef>Ansprechpartner</th>
+        <td mat-cell *matCellDef="let element">{{ element.person }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="edit">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-icon aria-hidden="false" aria-label="Edit Icon">edit</mat-icon>
+        </th>
+        <td mat-cell *matCellDef="let element" class="editCol">
           <mat-icon
             aria-hidden="false"
-            aria-label="info Icon"
-            class="infoIcon"
-            (click)="showInfo(element)"
-            >info</mat-icon
+            aria-label="Edit Icon"
+            (click)="edit(element)"
+            *ngIf="!element.weekEndRow && !element.isGame"
+            >edit</mat-icon
           >
-        </div>
-      </td>
-    </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="details">
-      <th mat-header-cell *matHeaderCellDef>Details</th>
-      <td mat-cell *matCellDef="let element">{{ element.details }}</td>
-    </ng-container>
+      <ng-container matColumnDef="delete">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-icon aria-hidden="false" aria-label="delete Icon"
+            >delete</mat-icon
+          >
+        </th>
+        <td mat-cell *matCellDef="let element" class="editCol">
+          <mat-icon
+            aria-hidden="false"
+            aria-label="delete Icon"
+            (click)="delete(element)"
+            *ngIf="!element.weekEndRow && !element.isGame"
+            >delete</mat-icon
+          >
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="person">
-      <th mat-header-cell *matHeaderCellDef>Ansprechpartner</th>
-      <td mat-cell *matCellDef="let element">{{ element.person }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="edit">
-      <th mat-header-cell *matHeaderCellDef>
-        <mat-icon aria-hidden="false" aria-label="Edit Icon">edit</mat-icon>
-      </th>
-      <td mat-cell *matCellDef="let element" class="editCol">
-        <mat-icon
-          aria-hidden="false"
-          aria-label="Edit Icon"
-          (click)="edit(element)"
-          *ngIf="!element.weekEndRow && !element.isGame"
-          >edit</mat-icon
-        >
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="delete">
-      <th mat-header-cell *matHeaderCellDef>
-        <mat-icon aria-hidden="false" aria-label="delete Icon">delete</mat-icon>
-      </th>
-      <td mat-cell *matCellDef="let element" class="editCol">
-        <mat-icon
-          aria-hidden="false"
-          aria-label="delete Icon"
-          (click)="delete(element)"
-          *ngIf="!element.weekEndRow && !element.isGame"
-          >delete</mat-icon
-        >
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr
-      mat-row
-      *matRowDef="let row; columns: displayedColumns"
-      [ngClass]="{ weekRow: row.weekEndRow }"
-    ></tr>
-  </table>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        [ngClass]="{ weekRow: row.weekEndRow }"
+      ></tr>
+    </table>
+  </div>
 </div>

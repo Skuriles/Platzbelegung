@@ -1,17 +1,34 @@
 <h2 mat-dialog-title>Event Info</h2>
 <mat-dialog-content class="mat-typography">
-  <div>
-    Titel: {{ event.title }}<br />
-    Details: {{ event.details }} <br />
-    Datum: <br />
-    {{ event.startDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-    }}<br />
-    bis <br />
-    {{ event.endDatetime | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-    }}<br />
-    Verantwortlicher:
-    {{ event.person }}
-  </div>
+  <table
+    mat-table
+    [dataSource]="datasource"
+    class="mat-elevation-z8 calendar-box"
+  >
+    <ng-container matColumnDef="info">
+      <th mat-header-cell *matHeaderCellDef>Info</th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        [ngClass]="{ mobileDate: isMobileScreen }"
+      >
+        {{ element.info }}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="wert">
+      <th mat-header-cell *matHeaderCellDef>Ende</th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        [ngClass]="{ mobileDate: isMobileScreen }"
+      >
+        {{ element.value }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Schließen</button>

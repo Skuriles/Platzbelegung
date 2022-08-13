@@ -1,14 +1,18 @@
-<h2 mat-dialog-title>Alle oder nur dieses Event löschen?</h2>
+<h2 mat-dialog-title>
+  Alle oder nur dieses Event <span *ngIf="event.edit">speichern</span
+  ><span *ngIf="!event.edit">löschen</span>?
+</h2>
 <mat-dialog-content class="mat-typography">
   <span>Dieses Event ist Teil eines sich wiederholenden Events</span><br />
   <div class="mat-body-strong">
-    Spiel: {{ event.startDatetime | date: "dd-MM-yyyy HH:mm" }}<br />
+    Start: {{ event.startDatetime | date: "dd-MM-yyyy HH:mm" }}<br />
     {{ event.title }} - {{ event.details }}
   </div>
   <br />
   <div>
-    Möchtest du ALLE Events dieser Reihe löschen oder nur dieses an diesem
-    Termin?
+    Möchtest du ALLE Events dieser Reihe
+    <span *ngIf="event.edit">speichern</span
+    ><span *ngIf="!event.edit">löschen</span> oder nur dieses an diesem Termin?
   </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
@@ -19,7 +23,8 @@
     [mat-dialog-close]="event"
     cdkFocusInitial
   >
-    Nur dieses löschen
+    Nur dieses <span *ngIf="event.edit">speichern</span
+    ><span *ngIf="!event.edit">löschen</span>
   </button>
   <button
     mat-flat-button
@@ -27,6 +32,7 @@
     mat-dialog-close="all"
     cdkFocusInitial
   >
-    ALLE löschen!
+    ALLE <span *ngIf="event.edit">speichern</span
+    ><span *ngIf="!event.edit">löschen</span>!
   </button>
 </mat-dialog-actions>

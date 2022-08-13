@@ -52,6 +52,7 @@ export class MainpageComponent implements OnInit {
   public viewDate: Date = new Date();
   public activeDayIsOpen = false;
   public refresh = new Subject<void>();
+  public locale = "de";
 
   actions: CalendarEventAction[] = [
     {
@@ -137,7 +138,12 @@ export class MainpageComponent implements OnInit {
   }
 
   handleEvent(action: string, event: CalendarEvent): void {
-    this.edit(this.allEvents.find((e) => e.id === event.id));
+    const svdEvent = this.allEvents.find((e) => e.id === event.id);
+    if (this.loginService.loggedIn && !svdEvent.isGame) {
+      this.edit(svdEvent);
+    } else {
+      this.showInfo(svdEvent);
+    }
     this.closeOpenMonthViewDay();
   }
 
@@ -231,7 +237,7 @@ export class MainpageComponent implements OnInit {
           this.delete(result);
           return;
         }
-        this.saveEvent(element);
+        this.saveEvent(result);
       } else {
         // nothing to do
       }
@@ -241,6 +247,7 @@ export class MainpageComponent implements OnInit {
   public showInfo(element: SvdEvent) {
     const dialogRef = this.dialog.open(InfoEventComponent, {
       data: element,
+      minWidth: 400,
     });
   }
 
@@ -276,12 +283,35 @@ export class MainpageComponent implements OnInit {
   }
 
   private saveEvent(element: SvdEvent) {
-    const result = this.helperService.handleSaveData(element);
-    if (!result) {
+    if (!element.editSingle && (element.repeats || element.baseId)) {
+      this.handleRepeatEdit(element);
       return;
     }
-
     this.httpService.saveEvent(element).subscribe(
+      (saved: boolean) => {
+        if (saved) {
+          this.helperService.openSnackBar("Gespeichert", "Ok");
+        } else {
+          this.helperService.openSnackBar(
+            "Speichern fehlgeschlagen",
+            "Ok",
+            "errorSnack"
+          );
+        }
+        this.getAllEvents();
+      },
+      (err) => {
+        this.helperService.openSnackBar(
+          "Speichern fehlgeschlagen",
+          "Ok",
+          "errorSnack"
+        );
+      }
+    );
+  }
+
+  private saveAllEvents(element: SvdEvent) {
+    this.httpService.saveEventAll(element).subscribe(
       (saved: boolean) => {
         if (saved) {
           this.helperService.openSnackBar("Gespeichert", "Ok");
@@ -330,7 +360,7 @@ export class MainpageComponent implements OnInit {
 
   private deleteEvent(event: SvdEvent) {
     if (event.repeats || event.baseId) {
-      this.handleRepeateDelete(event);
+      this.handleRepeatDelete(event);
       return;
     }
     this.httpService.deleteEvent(event.id as number).subscribe(
@@ -384,7 +414,7 @@ export class MainpageComponent implements OnInit {
     );
   }
 
-  handleRepeateDelete(event: SvdEvent) {
+  handleRepeatDelete(event: SvdEvent) {
     const dialogRef = this.dialog.open(ConfirmBoxRepeatComponent, {
       data: event,
     });
@@ -394,6 +424,21 @@ export class MainpageComponent implements OnInit {
         this.deleteAllEvents(event);
       } else if (result) {
         this.deleteEvent(event);
+      }
+    });
+  }
+
+  handleRepeatEdit(event: SvdEvent) {
+    event.edit = true;
+    const dialogRef = this.dialog.open(ConfirmBoxRepeatComponent, {
+      data: event,
+    });
+
+    dialogRef.afterClosed().subscribe((result: SvdEvent | string) => {
+      if (result === "all") {
+        this.saveAllEvents(event);
+      } else if (result) {
+        this.saveEvent(event);
       }
     });
   }

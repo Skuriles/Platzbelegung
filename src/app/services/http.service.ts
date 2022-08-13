@@ -64,6 +64,12 @@ export class HttpService {
     return this.postAuthRequest(nodeUrl, body);
   }
 
+  public saveEventAll(element: SvdEvent) {
+    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/saveEventAll";
+    const body = { element };
+    return this.postAuthRequest(nodeUrl, body);
+  }
+
   public addEvent(element: SvdEvent) {
     const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/addEvent";
     const body = { element };

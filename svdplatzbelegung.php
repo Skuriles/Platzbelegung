@@ -30,6 +30,11 @@ add_action('rest_api_init', function () {
         'callback' => 'save_svdapi_event',
     ));
 
+    register_rest_route('svd_platzbelegung/v1', '/saveEventAll', array(
+        'methods' => 'POST',
+        'callback' => 'save_svdapi_event_all',
+    ));
+
     register_rest_route('svd_platzbelegung/v1', '/addEvent', array(
         'methods' => 'POST',
         'callback' => 'insert_svdapi_event',
@@ -115,17 +120,13 @@ function save_svdapi_event(WP_REST_Request $request)
     $table_name = $wpdb->prefix . svdPlatzbelegungTable;
     $result = $request->get_json_params();
     $ele = $result["element"];
-    $startdate = sanitize_text_field($ele["startdate"]);
-    $enddate = sanitize_text_field($ele["enddate"]);
+    $startdate = sanitize_text_field($ele["startdateStr"]);
+    $enddate = sanitize_text_field($ele["enddateStr"]);
     $title = sanitize_text_field($ele["title"]);
     $person = sanitize_text_field($ele["person"]);
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
     $orte = sanitize_text_field($ele["ortePhp"]);
-    $repeats = sanitize_text_field($ele["repeatsPhp"]);
-    $repeatsEnd = sanitize_text_field($ele["repeatsEnd"]);
-    $baseId = sanitize_text_field($ele["baseId"]);
-    $customDaysPhp = sanitize_text_field($ele["customDaysPhp"]);
     $result = $wpdb->update(
         $table_name,
         array(
@@ -136,13 +137,109 @@ function save_svdapi_event(WP_REST_Request $request)
             'details' => $details,
             'allDayPhp' => $allday,
             'ortePhp' => $orte,
-            'repeatsPhp' => $repeats,
-            'repeatsEnd' => $repeatsEnd,
-            'baseId' => $baseId,
-            'customDaysPhp' => $customDaysPhp,
         ),
         array('id' => $ele["id"])
     );
+    return $result;
+}
+
+function save_svdapi_event_all(WP_REST_Request $request)
+{
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . svdPlatzbelegungTable;
+    $result = $request->get_json_params();
+    $ele = $result["element"];
+    $startdate = sanitize_text_field($ele["startdateStr"]);
+    $enddate = sanitize_text_field($ele["enddateStr"]);
+    $title = sanitize_text_field($ele["title"]);
+    $person = sanitize_text_field($ele["person"]);
+    $details = sanitize_text_field($ele["details"]);
+    $allday = $ele["allDayPhp"];
+    $orte = sanitize_text_field($ele["ortePhp"]);
+    $current = $wpdb->get_results(
+        $wpdb->prepare("SELECT * FROM {$table_name} WHERE id=%d", $ele["id"]));
+    $diffStart = getDiffTime($current['startdateStr'], $startDate);
+    $diffEnd = getDiffTime($current['enddateStr'], $endDate);
+    $result = $wpdb->update(
+        $table_name,
+        array(
+            'title' => $title,
+            'startdateStr' => $startdate,
+            'enddateStr' => $enddate,
+            'person' => $person,
+            'details' => $details,
+            'allDayPhp' => $allday,
+            'ortePhp' => $orte,
+        ),
+        array('id' => $ele["id"])
+    );
+    if ($result == 1 && $ele["baseId"] != null) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE $table_name SET
+                title=$title,
+                startdateStr=ADDTIME(startdateStr, $diffStart),
+                enddateStr=ADDTIME(startdateStr, $diffEnd),
+                person=$person,
+                details=$details,
+                allDayPhp=$allday,
+                ortePhp=$orte WHERE id='" . $ele['baseId'] . "' OR baseId='" . $ele['baseId'] . "'"
+            )
+        );
+        // $result = $wpdb->update(
+        //     $table_name,
+        //     array(
+        //         'title' => $title,
+        //         'startdateStr' => $startdate,
+        //         'enddateStr' => $enddate,
+        //         'person' => $person,
+        //         'details' => $details,
+        //         'allDayPhp' => $allday,
+        //         'ortePhp' => $orte,
+        //     ),
+        //     array('baseId' => $ele["baseId"])
+        // );
+        // $result = $wpdb->update(
+        //     $table_name,
+        //     array(
+        //         'title' => $title,
+        //         'startdateStr' => $startdate,
+        //         'enddateStr' => $enddate,
+        //         'person' => $person,
+        //         'details' => $details,
+        //         'allDayPhp' => $allday,
+        //         'ortePhp' => $orte,
+        //     ),
+        //     array('id' => $ele["baseId"])
+        // );
+    }
+    if ($result == 1 && $ele["baseId"] == null) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE $table_name SET
+            title=$title,
+            startdateStr=ADDTIME(startdateStr, $diffStart),
+            enddateStr=ADDTIME(startdateStr, $diffEnd),
+            person=$person,
+            details=$details,
+            allDayPhp=$allday,
+            ortePhp=$orte WHERE baseId='" . $ele['id'] . "'"
+            ));
+        // $result = $wpdb->update(
+        //     $table_name,
+        //     array(
+        //         'title' => $title,
+        //         'startdateStr' => $startdate,
+        //         'enddateStr' => $enddate,
+        //         'person' => $person,
+        //         'details' => $details,
+        //         'allDayPhp' => $allday,
+        //         'ortePhp' => $orte,
+        //     ),
+        //     array('baseId' => $ele["id"])
+        // );
+    }
     return $result;
 }
 
@@ -180,13 +277,12 @@ function insert_svdapi_event(WP_REST_Request $request)
         )
     );
     $lastid = $wpdb->insert_id;
-    if ($repeats == "1") {
+    if ($repeats == "1" && $result == 1) {
         $weeks = datediffInWeeks($startdate, $repeatsEnd);
         $start = new DateTime($startdate);
         $day = $start->format('N');
         $customDays = $ele["customDays"];
         $repeatDays = getWeekDayOffsets($day, $customDays);
-        // $test = array();
         for ($i = 1; $i <= $weeks; $i++) {
             for ($j = 0; $j < count($repeatDays); $j++) {
                 $start = new DateTime($startdate);
@@ -194,19 +290,8 @@ function insert_svdapi_event(WP_REST_Request $request)
                 $offset = ($i * 7) + $repeatDays[$j];
                 $newStartDate = $start->add(new DateInterval('P' . $offset . 'D'));
                 $newEndDate = $end->add(new DateInterval('P' . $offset . 'D'));
-                // array_push($test, array(
-                //     'title' => $title,
-                //     'startdateStr' => $newStartDate->format('Y-m-d H:i:s'),
-                //     'enddateStr' => $newEndDate->format('Y-m-d H:i:s'),
-                //     'person' => $person,
-                //     'details' => $details,
-                //     'allDayPhp' => $allday,
-                //     'ortePhp' => $orte,
-                //     'repeatsPhp' => "0",
-                //     'baseId' => $lastid,
-                // ));
                 if ($newStartDate < new DateTime($repeatsEnd) && $newStartDate > new DateTime($startdate)) {
-                    $wpdb->insert(
+                    $result = $wpdb->insert(
                         $table_name,
                         array(
                             'title' => $title,
@@ -225,10 +310,7 @@ function insert_svdapi_event(WP_REST_Request $request)
                 }
             }
         }
-        // return $wpdb->print_error();
-
     }
-    // return $test;
     return $result;
 }
 
@@ -237,6 +319,13 @@ function datediffInWeeks($date1, $date2)
     $first = new DateTime($date1);
     $second = new DateTime($date2);
     return floor($first->diff($second)->days / 7);
+}
+
+function getDiffTime($date1, $date2)
+{
+    $first = new DateTime($date1);
+    $second = new DateTime($date2);
+    return $first->diff($second)->seconds;
 }
 
 function getWeekDayOffsets($day, $customDays)

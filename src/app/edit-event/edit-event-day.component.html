@@ -7,6 +7,7 @@
           class="example-margin"
           [(ngModel)]="event.allDay"
           name="allday"
+          [disabled]="event.repeats || event.baseId"
           >Ganztag-Event</mat-checkbox
         >
       </section>
@@ -29,10 +30,15 @@
             type="datetime-local"
             placeholder="Ende"
             [ngModel]="event.endDatetime | date: dateFormat"
-            (ngModelChange)="event.enddateStr = $event"
+            (ngModelChange)="endDateChanged($event)"
             name="ende"
           />
         </mat-form-field>
+        <p class="alert-text" *ngIf="showHint">
+          Wenn sich bei einem wiederholenden Event das Datum ändert, kann nur
+          dieses Event und nicht die ganze Reihe wiederholender Events
+          bearbeitet werden! (nur Uhrzeit!)
+        </p>
       </div>
       <div *ngIf="event.allDay">
         <mat-form-field appearance="fill">
@@ -64,10 +70,16 @@
           class="example-margin"
           [(ngModel)]="event.repeats"
           name="repeatCb"
+          disabled="true"
           >Wiederholt sich?</mat-checkbox
         >
       </section>
-      <div *ngIf="event.repeats">
+      <div *ngIf="event.repeats || event.baseId">
+        <p>
+          Dieser Termin ist ein wiederholender Termin. Es können nicht alle
+          Parameter bearbeitet werden. Falls nötig Termin löschen und neu
+          anlegen!
+        </p>
         <section>
           <mat-form-field class="example-full-width" appearance="fill">
             <mat-label>Wiederholen bis</mat-label>
@@ -76,6 +88,7 @@
               [matDatepicker]="picker2"
               [(ngModel)]="event.repeatsEndDate"
               name="repeatend"
+              disabled="true"
             />
             <mat-hint>MM.DD.YYYY</mat-hint>
             <mat-datepicker-toggle
@@ -93,6 +106,7 @@
           selectable
           name="weekdays"
           [selected]="selected"
+          disabled="true"
         >
           <mat-chip
             #c="matChip"

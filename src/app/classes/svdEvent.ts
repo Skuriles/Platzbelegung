@@ -36,6 +36,8 @@ export class SvdEvent implements CalendarEvent {
   public customDays: string[] = [];
   public customDaysPhp: string;
   public delete: boolean;
+  public edit: boolean;
+  public editSingle: boolean;
 
   public createFrom?(element: SvdEvent) {
     this.id = element.id;
@@ -58,6 +60,7 @@ export class SvdEvent implements CalendarEvent {
       this.ortePhp = element.ortePhp;
     }
     this.repeats = element.repeatsPhp === "1" ? true : false;
+    this.repeatsPhp = element.repeatsPhp;
     this.baseId = element.baseId;
     if (this.repeats || this.baseId) {
       this.repeatsEndDate = DateTime.fromSQL(element.repeatsEnd)

@@ -17,6 +17,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatSelectModule } from "@angular/material/select";
 import { MatChipsModule } from "@angular/material/chips";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
 
 import { StartComponent } from "./app.component";
 
@@ -32,17 +33,22 @@ import { UploadCsvComponent } from "./upload-csv/upload-csv.component";
 import { InfoEventComponent } from "./info-event/info-event.component";
 import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
-import { CalendarModule, DateAdapter } from "angular-calendar";
+import {
+  CalendarDateFormatter,
+  CalendarModule,
+  DateAdapter,
+  CalendarEventTitleFormatter,
+} from "angular-calendar";
 import { adapterFactory } from "angular-calendar/date-adapters/date-fns";
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
-import localeDeExtra from "@angular/common/locales/extra/de";
 import { MAT_DATE_LOCALE } from "@angular/material/core";
 import { MatDateFnsModule } from "@angular/material-date-fns-adapter";
 import { de } from "date-fns/locale";
 import { ConfirmBoxRepeatComponent } from "./confirm-box-repeat/confirm-box-repeat.component";
+import { CustomDateFormatter } from "./services/custom-date-formatter.service";
 
-registerLocaleData(localeDe, "de-DE", localeDeExtra);
+registerLocaleData(localeDe);
 
 @NgModule({
   declarations: [
@@ -78,6 +84,7 @@ registerLocaleData(localeDe, "de-DE", localeDeExtra);
     MatDatepickerModule,
     MatSelectModule,
     MatChipsModule,
+    MatButtonToggleModule,
     CalendarModule.forRoot({
       provide: DateAdapter,
       useFactory: adapterFactory,
@@ -86,8 +93,9 @@ registerLocaleData(localeDe, "de-DE", localeDeExtra);
   providers: [
     HttpService,
     LoginService,
-
     { provide: MAT_DATE_LOCALE, useValue: de },
+    CalendarEventTitleFormatter,
+    { provide: CalendarDateFormatter, useClass: CustomDateFormatter },
   ],
   bootstrap: [StartComponent],
 })

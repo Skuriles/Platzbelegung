@@ -6,6 +6,7 @@
         <mat-checkbox
           class="example-margin"
           [(ngModel)]="event.allDay"
+          (ngModelChange)="allDayChanged($event)"
           name="allday"
           >Ganztag-Event</mat-checkbox
         >
@@ -59,7 +60,7 @@
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
       </div>
-      <section class="example-section">
+      <section class="example-section" *ngIf="!event.allDay">
         <mat-checkbox
           class="example-margin"
           [(ngModel)]="event.repeats"
