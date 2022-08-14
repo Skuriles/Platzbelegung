@@ -157,94 +157,29 @@ function save_svdapi_event_all(WP_REST_Request $request)
     $details = sanitize_text_field($ele["details"]);
     $allday = $ele["allDayPhp"];
     $orte = sanitize_text_field($ele["ortePhp"]);
-    $current = $wpdb->get_results(
+    $current = $wpdb->get_row(
         $wpdb->prepare("SELECT * FROM {$table_name} WHERE id=%d", $ele["id"]));
-    $diffStart = getDiffTime($current['startdateStr'], $startDate);
-    $diffEnd = getDiffTime($current['enddateStr'], $endDate);
-    $result = $wpdb->update(
-        $table_name,
-        array(
-            'title' => $title,
-            'startdateStr' => $startdate,
-            'enddateStr' => $enddate,
-            'person' => $person,
-            'details' => $details,
-            'allDayPhp' => $allday,
-            'ortePhp' => $orte,
-        ),
-        array('id' => $ele["id"])
-    );
-    // return array('result' => $result, 'baseId' => $ele["baseId"], 'id' => $ele["id"], 'repeats' => $ele['repeats']);
-    if ($result == 1 && $ele["baseId"] != null) {
+    if ($current->repeatsPhp == "1") {
+        $rows = $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM {$table_name} WHERE baseId=%d OR id=%d", $ele["id"], $ele["id"]));
+    } else {
+        $rows = $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM {$table_name} WHERE baseId=%d OR id=%d", $ele["baseId"], $ele["baseId"]));
+    }
+    $diffStart = getDiffTime($current->startdateStr, $startdate);
+    $diffEnd = getDiffTime($current->enddateStr, $enddate);
+    foreach ($rows as $row) {
         $query = $wpdb->prepare(
-            "UPDATE $table_name SET
-            title=$title,
-            startdateStr=ADDTIME($startdateStr, $diffStart),
-            enddateStr=ADDTIME($startdateStr, $diffEnd),
-            person=$person,
-            details=$details,
-            allDayPhp=$allday,
-            ortePhp=$orte WHERE id=%d OR baseId=%d", array(intval($ele['baseId']), intval($ele['baseId']))
+            "UPDATE $table_name SET title=%s, startdateStr=DATE_ADD(%s, INTERVAL %s SECOND), enddateStr=DATE_ADD(%s, INTERVAL %s SECOND), person=%s, details=%s, allDayPhp=$allday, ortePhp=%s WHERE id=%d", array(strval($title), strval($row->startdateStr), strval($diffStart), strval($row->enddateStr), strval($diffEnd), strval($person), strval($details), strval($orte), $row->id)
         );
-        $wpdb->query(
+        $result = $wpdb->query(
             $query
         );
-        // $result = $wpdb->update(
-        //     $table_name,
-        //     array(
-        //         'title' => $title,
-        //         'startdateStr' => $startdate,
-        //         'enddateStr' => $enddate,
-        //         'person' => $person,
-        //         'details' => $details,
-        //         'allDayPhp' => $allday,
-        //         'ortePhp' => $orte,
-        //     ),
-        //     array('baseId' => $ele["baseId"])
-        // );
-        // $result = $wpdb->update(
-        //     $table_name,
-        //     array(
-        //         'title' => $title,
-        //         'startdateStr' => $startdate,
-        //         'enddateStr' => $enddate,
-        //         'person' => $person,
-        //         'details' => $details,
-        //         'allDayPhp' => $allday,
-        //         'ortePhp' => $orte,
-        //     ),
-        //     array('id' => $ele["baseId"])
-        // );
+        if ($result != 1) {
+            return $result;
+        }
     }
-    if ($result == 1 && $ele['repeats']) {
-        $query = $wpdb->prepare(
-            "UPDATE $table_name SET
-            title=$title,
-            startdateStr=ADDTIME($startdateStr, $diffStart),
-            enddateStr=ADDTIME($startdateStr, $diffEnd),
-            person=$person,
-            details=$details,
-            allDayPhp=$allday,
-            ortePhp=$orte WHERE baseId=%d", intval($ele['id'])
-        );
-        // return $query;
-        $wpdb->query(
-            $query
-        );
-        // $result = $wpdb->update(
-        //     $table_name,
-        //     array(
-        //         'title' => $title,
-        //         'startdateStr' => $startdate,
-        //         'enddateStr' => $enddate,
-        //         'person' => $person,
-        //         'details' => $details,
-        //         'allDayPhp' => $allday,
-        //         'ortePhp' => $orte,
-        //     ),
-        //     array('baseId' => $ele["id"])
-        // );
-    }
+
     return $result;
 }
 
@@ -330,7 +265,8 @@ function getDiffTime($date1, $date2)
 {
     $first = new DateTime($date1);
     $second = new DateTime($date2);
-    return $first->diff($second)->seconds;
+    $seconds = $second->getTimestamp() - $first->getTimestamp();
+    return $seconds;
 }
 
 function getWeekDayOffsets($day, $customDays)
