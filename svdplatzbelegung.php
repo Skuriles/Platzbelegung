@@ -223,7 +223,7 @@ function insert_svdapi_event(WP_REST_Request $request)
         $day = $start->format('N');
         $customDays = $ele["customDays"];
         $repeatDays = getWeekDayOffsets($day, $customDays);
-        for ($i = 1; $i <= $weeks; $i++) {
+        for ($i = 0; $i <= $weeks; $i++) {
             for ($j = 0; $j < count($repeatDays); $j++) {
                 $start = new DateTime($startdate);
                 $end = new DateTime($enddate);

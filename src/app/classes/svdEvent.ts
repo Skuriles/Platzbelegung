@@ -94,13 +94,12 @@ export class SvdEvent implements CalendarEvent {
 export class Spieltag {
   static convert(spieltag: Spieltag): SvdEvent {
     const event: SvdEvent = new SvdEvent();
-    event.id = spieltag.id;
+    event.id = -1 * spieltag.id;
     event.allDay = false;
     event.isGame = true;
-    event.title = "Heimspiel";
+    event.title = "Heimspiel " + spieltag.mannschaft;
     event.startdateStr = spieltag.datum;
     event.start = DateTime.fromSQL(spieltag.datum).toLocal().toJSDate();
-    event.end = DateTime.fromSQL(spieltag.datum).toLocal().toJSDate();
     event.startDatetime = DateTime.fromSQL(spieltag.datum).toLocal();
     event.endDatetime = DateTime.fromSQL(spieltag.datum)
       .toLocal()
@@ -108,12 +107,13 @@ export class Spieltag {
     event.enddateStr = event.endDatetime.toSQL({
       includeOffset: false,
     });
+    event.end = event.endDatetime.toJSDate();
     event.details = "Spiel: " + spieltag.heim + " : " + spieltag.gast;
     event.person = spieltag.person;
     event.weekEndRow = spieltag.weekEndRow;
     event.weekEndText = spieltag.weekEndText;
     event.allDay = false;
-    if (spieltag.mannschaft.indexOf("SVD 3") > -1) {
+    if (spieltag.heim.indexOf("SVD 3") > -1) {
       event.orte = [ORTE[1]];
     } else {
       event.orte = [ORTE[2]];

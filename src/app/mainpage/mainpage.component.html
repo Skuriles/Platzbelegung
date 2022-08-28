@@ -80,14 +80,28 @@
         <mat-button-toggle value="week">Woche</mat-button-toggle>
         <mat-button-toggle value="day">Tag</mat-button-toggle>
       </mat-button-toggle-group>
+      <div class="valueSelect">
+        <mat-form-field appearance="fill">
+          <mat-label>Nach Belegung filtern</mat-label>
+          <mat-select
+            multiple
+            (selectionChange)="ortChanged()"
+            [(value)]="selectedOrte"
+          >
+            <mat-option *ngFor="let ort of orte" [value]="ort">{{
+              ort
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
   </div>
-
+  <div style="clear: both"></div>
   <div [ngSwitch]="view" class="calendar-box">
     <mwl-calendar-month-view
       *ngSwitchCase="'month'"
       [viewDate]="viewDate"
-      [events]="allEvents"
+      [events]="calendarEvents"
       [activeDayIsOpen]="activeDayIsOpen"
       [refresh]="refresh"
       (dayClicked)="dayClicked($event.day)"
@@ -99,7 +113,7 @@
     <mwl-calendar-week-view
       *ngSwitchCase="'week'"
       [viewDate]="viewDate"
-      [events]="allEvents"
+      [events]="calendarEvents"
       [refresh]="refresh"
       (dayClicked)="dayClicked($event.day)"
       (eventClicked)="handleEvent('Clicked', $event.event)"
@@ -110,7 +124,7 @@
     <mwl-calendar-day-view
       *ngSwitchCase="'day'"
       [viewDate]="viewDate"
-      [events]="allEvents"
+      [events]="calendarEvents"
       [refresh]="refresh"
       (dayClicked)="dayClicked($event.day)"
       (eventClicked)="handleEvent('Clicked', $event.event)"
@@ -259,5 +273,12 @@
         [ngClass]="{ weekRow: row.weekEndRow }"
       ></tr>
     </table>
+    <mat-paginator
+      #paginator
+      [pageSizeOptions]="[10, 25, 50]"
+      showFirstLastButtons
+      aria-label="Seite auswählen"
+    >
+    </mat-paginator>
   </div>
 </div>

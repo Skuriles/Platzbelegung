@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit } from "@angular/core";
+import { Component, NgZone, OnInit, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { DateTime, Settings } from "luxon";
 import { Credentials } from "../classes/credentials";
@@ -27,6 +27,8 @@ import { CustomEventTitleFormatterService } from "../services/custom-event-title
 import { Subject } from "rxjs";
 import { ConfirmBoxRepeatComponent } from "../confirm-box-repeat/confirm-box-repeat.component";
 import { HelperService } from "../services/helper.service";
+import { ORTE } from "../classes/orte";
+import { MatPaginator } from "@angular/material/paginator";
 
 @Component({
   selector: "app-mainpage",
@@ -40,8 +42,11 @@ import { HelperService } from "../services/helper.service";
   ],
 })
 export class MainpageComponent implements OnInit {
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+
   public tableEvents: SvdEvent[] = [];
   public allEvents: SvdEvent[] = [];
+  public calendarEvents: SvdEvent[] = [];
   public view: CalendarView = CalendarView.Month;
   private editEle: SvdEvent;
   public dataSource: MatTableDataSource<SvdEvent>;
@@ -53,6 +58,8 @@ export class MainpageComponent implements OnInit {
   public activeDayIsOpen = false;
   public refresh = new Subject<void>();
   public locale = "de";
+  public orte = ORTE;
+  public selectedOrte: string[] = [];
 
   actions: CalendarEventAction[] = [
     {
@@ -147,6 +154,20 @@ export class MainpageComponent implements OnInit {
     this.closeOpenMonthViewDay();
   }
 
+  ortChanged() {
+    this.filterEventsByOrt();
+  }
+
+  filterEventsByOrt() {
+    if (!this.selectedOrte || this.selectedOrte.length === 0) {
+      this.calendarEvents = this.allEvents;
+      return;
+    }
+    this.calendarEvents = this.allEvents.filter((e) =>
+      e.orte.some((o) => this.selectedOrte.includes(o))
+    );
+  }
+
   private getAllEvents() {
     this.dataSource = null;
     this.allEvents = [];
@@ -171,8 +192,10 @@ export class MainpageComponent implements OnInit {
           this.checkWeekDay(svdEvent);
         }
         this.allEvents = this.allEvents.sort((a, b) => this.sortByDate(a, b));
+        this.calendarEvents = this.allEvents;
         this.filterEventByDate();
         this.dataSource = new MatTableDataSource<SvdEvent>(this.tableEvents);
+        this.dataSource.paginator = this.paginator;
         this.refresh.next();
         this.ngzone.run(() => {});
       });
@@ -209,7 +232,7 @@ export class MainpageComponent implements OnInit {
 
   private filterEventByDate() {
     this.tableEvents = [];
-    for (const svdEvent of this.allEvents) {
+    for (const svdEvent of this.calendarEvents) {
       this.checkWeekDay(svdEvent);
       const newEvent = new SvdEvent();
       newEvent.createFrom(svdEvent);

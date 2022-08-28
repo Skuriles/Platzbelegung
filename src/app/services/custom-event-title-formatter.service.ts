@@ -7,6 +7,9 @@ import { SvdEvent } from "../classes/svdEvent";
 export class CustomEventTitleFormatterService extends CalendarEventTitleFormatter {
   month(event: SvdEvent): string {
     let orte = "";
+    const format = event.allDay
+      ? "ccc, d. MMMM yyyy"
+      : "ccc, d. MMMM yyyy - HH:mm";
     const personText = event.isGame ? "Sportheimdienst" : "Verantwortlicher";
     const person = event.person ? event.person : "";
     for (const ort of event.orte) {
@@ -15,9 +18,9 @@ export class CustomEventTitleFormatterService extends CalendarEventTitleFormatte
     let result = `${event.title}: ${
       event.details
     }<br>Start: ${event.startDatetime.toFormat(
-      "ccc, d. MMMM yyyy - HH:mm"
-    )}<br>Ende: ${event.endDatetime.toFormat("ccc, d. MMMM yyyy - HH:mm")}
-    <br>Gelände: ${event.ortePhp}
+      format
+    )}<br>Ende: ${event.endDatetime.toFormat(format)}
+    <br>Gelände: ${event.orte}
     <br>${personText}: ${person}`;
     if (event.repeats || event.baseId) {
       let days = "";
@@ -27,7 +30,10 @@ export class CustomEventTitleFormatterService extends CalendarEventTitleFormatte
       days = days.slice(0, -1);
       result += `<br>Wiederholendes Event, immer ${days} bis ${DateTime.fromJSDate(
         event.repeatsEndDate
-      ).toFormat("ccc, d. MMMM yyyy - HH:mm")}`;
+      ).toFormat(format)}`;
+    }
+    if (event.allDay) {
+      result += "<br>Ganztagsevent!";
     }
     return result;
   }

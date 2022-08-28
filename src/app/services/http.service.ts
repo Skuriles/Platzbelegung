@@ -2,17 +2,24 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { TokenData } from "../classes/tokenData";
 import { SvdEvent } from "../classes/svdEvent";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: "root",
 })
 export class HttpService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    if (!environment.production) {
+      this.baseUrl = "http://localhost:65004/svd/";
+    } else {
+      this.baseUrl = "https://www.sv-deggenhausertal.de/";
+    }
+    this.apiPrefix = this.baseUrl + "wp-json/";
+  }
 
   public token: TokenData;
-  private baseUrl = "http://localhost:65004/svd/";
-  //  private baseUrl = "https://www.sv-deggenhausertal.de/";
-  private apiPrefix = this.baseUrl + "wp-json/";
+  private baseUrl: string;
+  private apiPrefix: string;
 
   public getApiInfo() {
     const nodeUrl = this.apiPrefix;
