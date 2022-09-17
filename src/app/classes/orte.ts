@@ -5,5 +5,6 @@ export const ORTE = [
   "Sportheim",
   "Grillhaus",
   "Halle Wittenhofen",
+  "Limpach",
   "Sonstiges",
 ];
