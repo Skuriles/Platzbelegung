@@ -1,6 +1,6 @@
-th.mat-header-cell:last-of-type,
-td.mat-cell:last-of-type,
-td.mat-footer-cell:last-of-type {
+th.mat-mdc-header-cell:last-of-type,
+td.mat-mdc-cell:last-of-type,
+td.mat-mdc-footer-cell:last-of-type {
   padding-right: 8px;
   cursor: pointer;
 }
@@ -16,7 +16,7 @@ td.mat-footer-cell:last-of-type {
   margin-left: 15px;
 }
 
-.example-button-row .mat-button-base {
+.example-button-row .mat-mdc-button-base {
   margin: 8px 8px 8px 0;
 }
 
@@ -73,7 +73,7 @@ td.mat-footer-cell:last-of-type {
   margin-left: 0px;
 }
 
-.calendar-box .example-button-row .mat-button-base {
+.calendar-box .example-button-row .mat-mdc-button-base {
   margin: 8px 8px 8px 0;
 }
 

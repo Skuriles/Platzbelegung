@@ -18,7 +18,7 @@
             matInput
             type="datetime-local"
             placeholder="Start"
-            [ngModel]="event.startDatetime | date: dateFormat"
+            [ngModel]="event.startDatetime | date : dateFormat"
             (ngModelChange)="startDateChanged($event)"
             name="start"
           />
@@ -29,7 +29,7 @@
             matInput
             type="datetime-local"
             placeholder="Ende"
-            [ngModel]="event.endDatetime | date: dateFormat"
+            [ngModel]="event.endDatetime | date : dateFormat"
             (ngModelChange)="event.enddateStr = $event"
             name="ende"
           />
@@ -88,7 +88,7 @@
         </section>
         <section>
           <mat-label>Wochentage</mat-label>
-          <mat-chip-list
+          <mat-chip-listbox
             #chipList
             aria-label="Wochentage"
             multiple
@@ -96,15 +96,15 @@
             name="weekdays"
             [selected]="selected"
           >
-            <mat-chip
+            <mat-chip-option
               #c="matChip"
               *ngFor="let day of weekdays"
               (click)="toggleSelection(c)"
               [value]="day"
             >
               {{ day }}
-            </mat-chip>
-          </mat-chip-list>
+            </mat-chip-option>
+          </mat-chip-listbox>
         </section>
       </div>
       <mat-form-field class="example-full-width">

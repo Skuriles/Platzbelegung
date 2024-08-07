@@ -99,7 +99,7 @@
           </mat-form-field>
         </section>
         <mat-label>Wochentage</mat-label>
-        <mat-chip-list
+        <mat-chip-listbox
           #chipList
           aria-label="Wochentage"
           multiple
@@ -108,7 +108,7 @@
           [selected]="selected"
           disabled="true"
         >
-          <mat-chip
+          <mat-chip-option
             #c="matChip"
             *ngFor="let day of weekdays"
             (click)="toggleSelection(c)"
@@ -116,8 +116,8 @@
             [value]="day"
           >
             {{ day }}
-          </mat-chip>
-        </mat-chip-list>
+          </mat-chip-option>
+        </mat-chip-listbox>
       </div>
       <mat-form-field class="example-full-width">
         <mat-label>Titel</mat-label>

@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from "@angular/core";
-import { MatChip } from "@angular/material/chips";
+import { MatChip, MatChipOption } from "@angular/material/chips";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { DateTime } from "luxon";
 import { ORTE } from "../classes/orte";
@@ -37,7 +37,7 @@ export class EditEventComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  toggleSelection(chip: MatChip) {
+  toggleSelection(chip: MatChipOption) {
     chip.toggleSelected();
     if (chip.selected) {
       this.event.customDays.push(chip.value);
