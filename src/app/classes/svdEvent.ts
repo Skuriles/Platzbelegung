@@ -1,6 +1,5 @@
 import { CalendarEvent } from "angular-calendar";
 import { EventColor, EventAction } from "calendar-utils";
-import { el } from "date-fns/locale";
 import { DateTime } from "luxon";
 import { ORTE } from "./orte";
 

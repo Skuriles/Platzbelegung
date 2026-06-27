@@ -105,18 +105,16 @@
           multiple
           selectable
           name="weekdays"
-          [selected]="selected"
           disabled="true"
         >
-          <mat-chip-option
-            #c="matChip"
+          <mat-chip
             *ngFor="let day of weekdays"
-            (click)="toggleSelection(c)"
-            [selected]="event.customDays.indexOf(c.value) > -1"
+            (click)="toggleSelection(day)"
+            [selected]="event.customDays.indexOf(day) > -1"
             [value]="day"
           >
             {{ day }}
-          </mat-chip-option>
+          </mat-chip>
         </mat-chip-listbox>
       </div>
       <mat-form-field class="example-full-width">

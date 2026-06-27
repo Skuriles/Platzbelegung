@@ -1,6 +1,33 @@
-import { Component, NgZone, OnInit, ViewChild } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { DateTime, Settings } from "luxon";
+import { NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTableModule, MatTableDataSource } from "@angular/material/table";
+import { MatSnackBarModule, MatSnackBar } from "@angular/material/snack-bar";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatDialogModule } from "@angular/material/dialog";
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatSelectModule } from "@angular/material/select";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { MatPaginatorModule, MatPaginator } from "@angular/material/paginator";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { LayoutModule, BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
+import { LuxonModule } from "luxon-angular";
+import { CalendarModule } from "angular-calendar";
+import {
+  CalendarEvent,
+  CalendarEventAction,
+  CalendarEventTimesChangedEvent,
+  CalendarView,
+} from "angular-calendar";
+import { isSameDay, isSameMonth } from "date-fns";
+import { Subject } from "rxjs";
 import { Credentials } from "../classes/credentials";
 import { Spieltag, SvdEvent } from "../classes/svdEvent";
 import { TokenData } from "../classes/tokenData";
@@ -8,38 +35,29 @@ import { EditEventComponent } from "../edit-event/edit-event-day.component";
 import { LoginComponent } from "../login/login.component";
 import { HttpService } from "../services/http.service";
 import { LoginService } from "../services/login.service";
-import { MatTableDataSource } from "@angular/material/table";
 import { ConfirmBoxComponent } from "../confirm-box/confirm-box.component";
 import { UploadCsvComponent } from "../upload-csv/upload-csv.component";
-import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
-import { ERoles } from "../enum/roles";
 import { CreateEventComponent } from "../create-event/create-event.component";
 import { InfoEventComponent } from "../info-event/info-event.component";
-import {
-  CalendarEvent,
-  CalendarEventAction,
-  CalendarEventTimesChangedEvent,
-  CalendarEventTitleFormatter,
-  CalendarView,
-} from "angular-calendar";
-import { isSameDay, isSameMonth } from "date-fns";
-import { CustomEventTitleFormatterService } from "../services/custom-event-title-formatter.service";
-import { Subject } from "rxjs";
 import { ConfirmBoxRepeatComponent } from "../confirm-box-repeat/confirm-box-repeat.component";
 import { HelperService } from "../services/helper.service";
+import { ERoles } from "../enum/roles";
 import { ORTE } from "../classes/orte";
-import { MatPaginator } from "@angular/material/paginator";
 
 @Component({
   selector: "app-mainpage",
   templateUrl: "./mainpage.component.html",
   styleUrls: ["./mainpage.component.scss"],
-  providers: [
-    {
-      provide: CalendarEventTitleFormatter,
-      useClass: CustomEventTitleFormatterService,
-    },
+  standalone: true,
+  imports: [
+    NgIf, NgFor, NgClass, NgSwitch, NgSwitchCase, FormsModule,
+    MatButtonModule, MatIconModule, MatTableModule, MatSnackBarModule,
+    MatFormFieldModule, MatInputModule, MatDialogModule, MatToolbarModule,
+    MatCheckboxModule, MatSelectModule, MatChipsModule, MatButtonToggleModule,
+    MatPaginatorModule, MatDatepickerModule, LayoutModule, LuxonModule,
+    CalendarModule,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainpageComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -61,6 +79,14 @@ export class MainpageComponent implements OnInit {
   public orte = ORTE;
   public selectedOrte: string[] = [];
 
+  private httpService = inject(HttpService);
+  public dialog = inject(MatDialog);
+  public loginService = inject(LoginService);
+  private breakpointObserver = inject(BreakpointObserver);
+  private helperService = inject(HelperService);
+  private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
+
   actions: CalendarEventAction[] = [
     {
       label: '<i class="fas fa-fw fa-pencil-alt"></i>',
@@ -79,22 +105,16 @@ export class MainpageComponent implements OnInit {
     },
   ];
 
-  constructor(
-    private httpService: HttpService,
-    public dialog: MatDialog,
-    public loginService: LoginService,
-    private breakpointObserver: BreakpointObserver,
-    private ngzone: NgZone,
-    private helperService: HelperService
-  ) {
+  constructor() {
     Settings.defaultLocale = "de";
-    breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       if (result.matches) {
         this.isMobileScreen = true;
       } else {
         this.isMobileScreen = false;
       }
       this.setGui(this.isMobileScreen);
+      this.cdr.markForCheck();
     });
   }
 
@@ -103,9 +123,6 @@ export class MainpageComponent implements OnInit {
     this.checkToken();
     this.setGui(this.isMobileScreen);
     this.getAllEvents();
-    this.httpService.getApiInfo().subscribe((result) => {
-      const i = result;
-    });
   }
 
   closeOpenMonthViewDay() {
@@ -173,21 +190,18 @@ export class MainpageComponent implements OnInit {
     this.allEvents = [];
     this.tableEvents = [];
     this.httpService.getAllData().subscribe((result: SvdEvent[]) => {
-      // set date and sort
       for (const svdEvent of result) {
         const newEvent = new SvdEvent();
         newEvent.createFrom(svdEvent);
         this.allEvents.push(newEvent);
       }
       this.httpService.getAllGames().subscribe((spieltage: Spieltag[]) => {
-        // set date and sort
         for (const spiel of spieltage) {
           spiel.date = DateTime.fromSQL(spiel.datum);
           const spielEvent = Spieltag.convert(spiel);
           this.allEvents.push(spielEvent);
         }
         this.allEvents = this.allEvents.sort((a, b) => this.sortByDate(a, b));
-        // loop again to set correct weekend
         for (const svdEvent of this.allEvents) {
           this.checkWeekDay(svdEvent);
         }
@@ -197,7 +211,7 @@ export class MainpageComponent implements OnInit {
         this.dataSource = new MatTableDataSource<SvdEvent>(this.tableEvents);
         this.dataSource.paginator = this.paginator;
         this.refresh.next();
-        this.ngzone.run(() => {});
+        this.cdr.markForCheck();
       });
     });
   }
@@ -261,14 +275,12 @@ export class MainpageComponent implements OnInit {
           return;
         }
         this.saveEvent(result);
-      } else {
-        // nothing to do
       }
     });
   }
 
   public showInfo(element: SvdEvent) {
-    const dialogRef = this.dialog.open(InfoEventComponent, {
+    this.dialog.open(InfoEventComponent, {
       data: element,
       minWidth: 400,
     });
@@ -323,7 +335,7 @@ export class MainpageComponent implements OnInit {
         }
         this.getAllEvents();
       },
-      (err) => {
+      () => {
         this.helperService.openSnackBar(
           "Speichern fehlgeschlagen",
           "Ok",
@@ -347,7 +359,7 @@ export class MainpageComponent implements OnInit {
         }
         this.getAllEvents();
       },
-      (err) => {
+      () => {
         this.helperService.openSnackBar(
           "Speichern fehlgeschlagen",
           "Ok",
@@ -371,7 +383,7 @@ export class MainpageComponent implements OnInit {
         }
         this.getAllEvents();
       },
-      (err) => {
+      () => {
         this.helperService.openSnackBar(
           "Speichern fehlgeschlagen",
           "Ok",
@@ -399,11 +411,11 @@ export class MainpageComponent implements OnInit {
         }
         this.getAllEvents();
       },
-      (err) => {
+      () => {
         this.helperService.openSnackBar(
           "Löschen fehlgeschlagen",
           "Ok",
-          "errorSnack"
+            "errorSnack"
         );
       }
     );
@@ -427,7 +439,7 @@ export class MainpageComponent implements OnInit {
         }
         this.getAllEvents();
       },
-      (err) => {
+      () => {
         this.helperService.openSnackBar(
           "Löschen fehlgeschlagen",
           "Ok",
@@ -468,7 +480,6 @@ export class MainpageComponent implements OnInit {
 
   public login() {
     const dialogRef = this.dialog.open(LoginComponent);
-
     dialogRef.afterClosed().subscribe((creds: Credentials) => {
       if (creds) {
         this.loginFromDialog(creds);
@@ -478,7 +489,6 @@ export class MainpageComponent implements OnInit {
 
   public upload() {
     const dialogRef = this.dialog.open(UploadCsvComponent);
-
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.ngOnInit();
@@ -500,14 +510,16 @@ export class MainpageComponent implements OnInit {
                 .subscribe((info: string[]) => {
                   this.loginService.setRoles(info);
                   this.setGui(this.isMobileScreen);
+                  this.cdr.markForCheck();
                 });
             } else {
               this.setGui(this.isMobileScreen);
+              this.cdr.markForCheck();
             }
           });
         }
       },
-      (err) => {
+      () => {
         this.helperService.openSnackBar(
           "Fehler beim Einloggen - Bitte PW und Name prüfen",
           "Verstanden",
@@ -529,9 +541,11 @@ export class MainpageComponent implements OnInit {
             .subscribe((info: string[]) => {
               this.loginService.setRoles(info);
               this.setGui(this.isMobileScreen);
+              this.cdr.markForCheck();
             });
         } else {
           this.setGui(this.isMobileScreen);
+          this.cdr.markForCheck();
         }
       });
     }
@@ -542,6 +556,7 @@ export class MainpageComponent implements OnInit {
     sessionStorage.setItem("token", null);
     this.loginService.loggedIn = false;
     this.setGui(this.isMobileScreen);
+    this.cdr.markForCheck();
   }
 
   private sortByDate(a: SvdEvent, b: SvdEvent) {
@@ -553,7 +568,6 @@ export class MainpageComponent implements OnInit {
     if (aDate.toMillis() > bDate.toMillis()) {
       return 1;
     }
-    // a muss gleich b sein
     return 0;
   }
 

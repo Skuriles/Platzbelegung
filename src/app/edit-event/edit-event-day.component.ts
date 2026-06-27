@@ -1,7 +1,16 @@
-import { Component, Inject, OnInit } from "@angular/core";
-import { MatChip, MatChipOption } from "@angular/material/chips";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatNativeDateModule } from "@angular/material/core";
+import { MatSelectModule } from "@angular/material/select";
+import { NgFor, NgIf } from "@angular/common";
 import { DateTime } from "luxon";
+import { LuxonModule } from "luxon-angular";
 import { ORTE } from "../classes/orte";
 import { SvdEvent, Weekdays } from "../classes/svdEvent";
 import { HelperService } from "../services/helper.service";
@@ -10,23 +19,24 @@ import { HelperService } from "../services/helper.service";
   selector: "app-event-day",
   templateUrl: "./edit-event-day.component.html",
   styleUrls: ["./edit-event-day.component.scss"],
+  standalone: true,
+  imports: [NgFor, NgIf, FormsModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatNativeDateModule, MatSelectModule, LuxonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditEventComponent implements OnInit {
-  public event: SvdEvent;
+export class EditEventComponent {
+  public event: SvdEvent = inject(MAT_DIALOG_DATA);
   public oriEvent: SvdEvent;
   public dateFormat = "yyyy-MM-ddTHH:mm";
   public orte = ORTE;
   public weekdays = Weekdays;
-  public selected: MatChip[];
   public showHint: boolean;
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: SvdEvent,
-    public dialogRef: MatDialogRef<EditEventComponent>,
-    private helperService: HelperService
-  ) {
+
+  private dialogRef = inject(MatDialogRef<EditEventComponent>);
+  private helperService = inject(HelperService);
+
+  constructor() {
     this.oriEvent = new SvdEvent();
-    this.oriEvent.createFrom(data);
-    this.event = data;
+    this.oriEvent.createFrom(this.event);
     this.event.editSingle = false;
     this.event.startdateStr = DateTime.fromJSDate(this.event.start).toISO();
     this.event.enddateStr = DateTime.fromJSDate(this.event.end).toISO();
@@ -35,17 +45,12 @@ export class EditEventComponent implements OnInit {
     ).toISO();
   }
 
-  ngOnInit(): void {}
-
-  toggleSelection(chip: MatChipOption) {
-    chip.toggleSelected();
-    if (chip.selected) {
-      this.event.customDays.push(chip.value);
+  toggleSelection(day: string) {
+    const idx = this.event.customDays.indexOf(day);
+    if (idx > -1) {
+      this.event.customDays.splice(idx, 1);
     } else {
-      this.event.customDays.splice(
-        this.event.customDays.indexOf(chip.value),
-        1
-      );
+      this.event.customDays.push(day);
     }
   }
 

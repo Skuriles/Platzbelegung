@@ -21,16 +21,6 @@ export class HttpService {
   private baseUrl: string;
   private apiPrefix: string;
 
-  public getApiInfo() {
-    const nodeUrl = this.apiPrefix;
-    return this.getRequest(nodeUrl);
-  }
-
-  public test() {
-    const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/author/1";
-    return this.getRequest(nodeUrl);
-  }
-
   public getUserRole(id) {
     const nodeUrl = this.apiPrefix + "svd_platzbelegung/v1/userInfo/" + id;
     return this.postAuthRequest(nodeUrl, null);

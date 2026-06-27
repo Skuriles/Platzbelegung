@@ -1,19 +1,23 @@
-import { Component, Inject, OnInit } from "@angular/core";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { MatTableDataSource } from "@angular/material/table";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { MatButtonModule } from "@angular/material/button";
+import { MatDialogModule, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatTableModule } from "@angular/material/table";
+import { LuxonModule } from "luxon-angular";
 import { DateTime } from "luxon";
 import { SvdEvent } from "../classes/svdEvent";
 
 @Component({
   templateUrl: "./info-event.component.html",
   styleUrls: ["./info-event.component.scss"],
+  standalone: true,
+  imports: [MatButtonModule, MatDialogModule, MatTableModule, LuxonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InfoEventComponent implements OnInit {
-  public event: SvdEvent;
+export class InfoEventComponent {
+  public event: SvdEvent = inject(MAT_DIALOG_DATA);
   public datasource: { info; value }[];
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: SvdEvent) {
-    this.event = data;
+  constructor() {
     this.transform();
   }
 
@@ -61,20 +65,4 @@ export class InfoEventComponent implements OnInit {
   }
 
   displayedColumns = ["info", "wert"];
-
-  ngOnInit(): void {}
 }
-
-// <span *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay">
-// {{
-//   element.startDatetime
-//     | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-// }}
-// Uhr
-// </span>
-// <span *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay">
-// {{ element.startDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
-// </span>
-// <span *ngIf="!element.weekEndRow && element.allDay">
-// {{ element.startDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
-// </span>
