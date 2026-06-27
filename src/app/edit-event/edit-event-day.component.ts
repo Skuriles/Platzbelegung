@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatDatepickerModule } from "@angular/material/datepicker";
@@ -8,7 +9,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatNativeDateModule } from "@angular/material/core";
 import { MatSelectModule } from "@angular/material/select";
-import { NgFor, NgIf } from "@angular/common";
+import { DatePipe, NgFor } from "@angular/common";
 import { DateTime } from "luxon";
 import { LuxonModule } from "luxon-angular";
 import { ORTE } from "../classes/orte";
@@ -20,7 +21,7 @@ import { HelperService } from "../services/helper.service";
   templateUrl: "./edit-event-day.component.html",
   styleUrls: ["./edit-event-day.component.scss"],
   standalone: true,
-  imports: [NgFor, NgIf, FormsModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatNativeDateModule, MatSelectModule, LuxonModule],
+  imports: [DatePipe, NgFor, FormsModule, MatButtonModule, MatCheckboxModule, MatChipsModule, MatDatepickerModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatNativeDateModule, MatSelectModule, LuxonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditEventComponent {

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { DateTime, Settings } from "luxon";
-import { NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase } from "@angular/common";
+import { NgClass, NgFor, NgSwitch, NgSwitchCase } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
@@ -50,7 +50,7 @@ import { ORTE } from "../classes/orte";
   styleUrls: ["./mainpage.component.scss"],
   standalone: true,
   imports: [
-    NgIf, NgFor, NgClass, NgSwitch, NgSwitchCase, FormsModule,
+    NgFor, NgClass, NgSwitch, NgSwitchCase, FormsModule,
     MatButtonModule, MatIconModule, MatTableModule, MatSnackBarModule,
     MatFormFieldModule, MatInputModule, MatDialogModule, MatToolbarModule,
     MatCheckboxModule, MatSelectModule, MatChipsModule, MatButtonToggleModule,
@@ -591,12 +591,14 @@ export class MainpageComponent implements OnInit {
         setTimeout(() => {
           this.adminBtn = true;
           this.displayedColumns.push("delete");
+          this.cdr.markForCheck();
         }, 1);
         return;
       }
       if (this.loginService.userRole > ERoles.loggedOff) {
         setTimeout(() => {
           this.adminBtn = false;
+          this.cdr.markForCheck();
         }, 1);
         return;
       }

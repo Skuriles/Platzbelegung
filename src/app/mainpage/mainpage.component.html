@@ -1,43 +1,39 @@
 <div class="mat-typography">
   <div class="example-button-row">
-    <button
-      mat-raised-button
-      (click)="login()"
-      *ngIf="!loginService.loggedIn"
-      color="primary"
-    >
-      Bearbeiten
-    </button>
+    @if (!loginService.loggedIn) {
+      <button mat-raised-button (click)="login()" color="primary">
+        Bearbeiten
+      </button>
+    }
     <button mat-raised-button (click)="toggleDate()" color="basic">
-      <span *ngIf="!showOldDates">Alle Events</span>
-      <span *ngIf="showOldDates">Neue Events</span>
+      @if (!showOldDates) {
+        <span>Alle Events</span>
+      } @else {
+        <span>Neue Events</span>
+      }
     </button>
     <button
       mat-raised-button
       (click)="isMobileScreen = !isMobileScreen; setGui(isMobileScreen)"
       color="basic"
     >
-      <span *ngIf="!isMobileScreen">Mobile Ansicht</span>
-      <span *ngIf="isMobileScreen">Desktopmodus</span>
+      @if (!isMobileScreen) {
+        <span>Mobile Ansicht</span>
+      } @else {
+        <span>Desktopmodus</span>
+      }
     </button>
-    <button
-      mat-stroked-button
-      (click)="logout()"
-      *ngIf="loginService.loggedIn"
-      color="primary"
-    >
-      Ausloggen
-    </button>
+    @if (loginService.loggedIn) {
+      <button mat-stroked-button (click)="logout()" color="primary">
+        Ausloggen
+      </button>
+    }
 
-    <button
-      mat-mini-fab
-      color="primary"
-      (click)="newEvent()"
-      *ngIf="loginService.loggedIn && adminBtn"
-      class="addbtn"
-    >
-      <mat-icon>add</mat-icon>
-    </button>
+    @if (loginService.loggedIn && adminBtn) {
+      <button mat-mini-fab color="primary" (click)="newEvent()" class="addbtn">
+        <mat-icon>add</mat-icon>
+      </button>
+    }
   </div>
   <h3>Anmelden und auf Event im Kalender klicken um es zu bearbeiten</h3>
   <h3>
@@ -157,26 +153,21 @@
           *matCellDef="let element"
           [ngClass]="{ mobileDate: isMobileScreen }"
         >
-          <span
-            *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay"
-          >
-            {{
-              element.startDatetime
-                | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-            }}
-            Uhr
-          </span>
-          <span
-            *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay"
-          >
-            {{ element.startDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
-          </span>
-          <span *ngIf="!element.weekEndRow && element.allDay">
-            {{ element.startDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
-          </span>
-          <span *ngIf="element.weekEndRow">
-            {{ element.weekEndText }}
-          </span>
+          @if (!element.weekEndRow && !isMobileScreen && !element.allDay) {
+            <span>
+              {{
+                element.startDatetime
+                  | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+              }}
+              Uhr
+            </span>
+          } @else if (!element.weekEndRow && isMobileScreen && !element.allDay) {
+            <span>{{ element.startDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}</span>
+          } @else if (!element.weekEndRow && element.allDay) {
+            <span>{{ element.startDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag</span>
+          } @else if (element.weekEndRow) {
+            <span>{{ element.weekEndText }}</span>
+          }
         </td>
       </ng-container>
       <ng-container matColumnDef="datumEnd">
@@ -186,41 +177,39 @@
           *matCellDef="let element"
           [ngClass]="{ mobileDate: isMobileScreen }"
         >
-          <span
-            *ngIf="!element.weekEndRow && !isMobileScreen && !element.allDay"
-          >
-            {{
-              element.endDatetime
-                | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
-            }}
-            Uhr
-          </span>
-          <span
-            *ngIf="!element.weekEndRow && isMobileScreen && !element.allDay"
-          >
-            {{ element.endDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}
-          </span>
-          <span *ngIf="!element.weekEndRow && element.allDay">
-            {{ element.endDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag
-          </span>
+          @if (!element.weekEndRow && !isMobileScreen && !element.allDay) {
+            <span>
+              {{
+                element.endDatetime
+                  | dateTimeToFormat: "ccc, d. MMMM yyyy - HH:mm"
+              }}
+              Uhr
+            </span>
+          } @else if (!element.weekEndRow && isMobileScreen && !element.allDay) {
+            <span>{{ element.endDatetime | dateTimeToFormat: "dd.MM - HH:mm" }}</span>
+          } @else if (!element.weekEndRow && element.allDay) {
+            <span>{{ element.endDatetime | dateTimeToFormat: "dd.MM" }} - Ganztag</span>
+          }
         </td>
       </ng-container>
 
       <ng-container matColumnDef="mannschaft">
         <th mat-header-cell *matHeaderCellDef>Titel</th>
         <td mat-cell *matCellDef="let element">
-          <div class="infoText" *ngIf="!element.weekEndRow">
-            {{ element.title }}
-          </div>
-          <div *ngIf="!element.weekEndRow && isMobileScreen">
-            <mat-icon
-              aria-hidden="false"
-              aria-label="info Icon"
-              class="infoIcon"
-              (click)="showInfo(element)"
-              >info</mat-icon
-            >
-          </div>
+          @if (!element.weekEndRow) {
+            <div class="infoText">{{ element.title }}</div>
+          }
+          @if (!element.weekEndRow && isMobileScreen) {
+            <div>
+              <mat-icon
+                aria-hidden="false"
+                aria-label="info Icon"
+                class="infoIcon"
+                (click)="showInfo(element)"
+                >info</mat-icon
+              >
+            </div>
+          }
         </td>
       </ng-container>
 
@@ -239,13 +228,14 @@
           <mat-icon aria-hidden="false" aria-label="Edit Icon">edit</mat-icon>
         </th>
         <td mat-cell *matCellDef="let element" class="editCol">
-          <mat-icon
-            aria-hidden="false"
-            aria-label="Edit Icon"
-            (click)="edit(element)"
-            *ngIf="!element.weekEndRow && !element.isGame"
-            >edit</mat-icon
-          >
+          @if (!element.weekEndRow && !element.isGame) {
+            <mat-icon
+              aria-hidden="false"
+              aria-label="Edit Icon"
+              (click)="edit(element)"
+              >edit</mat-icon
+            >
+          }
         </td>
       </ng-container>
 
@@ -256,13 +246,14 @@
           >
         </th>
         <td mat-cell *matCellDef="let element" class="editCol">
-          <mat-icon
-            aria-hidden="false"
-            aria-label="delete Icon"
-            (click)="delete(element)"
-            *ngIf="!element.weekEndRow && !element.isGame"
-            >delete</mat-icon
-          >
+          @if (!element.weekEndRow && !element.isGame) {
+            <mat-icon
+              aria-hidden="false"
+              aria-label="delete Icon"
+              (click)="delete(element)"
+              >delete</mat-icon
+            >
+          }
         </td>
       </ng-container>
 

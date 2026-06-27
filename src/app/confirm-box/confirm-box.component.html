@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>Event löschen?</h2>
 <mat-dialog-content class="mat-typography">
   <div class="mat-body-strong">
-    Spiel: {{ event.startDatetime | date: "dd-MM-yyyy HH:mm" }}<br />
+    Spiel: {{ event.startDatetime.toJSDate() | date: "dd-MM-yyyy HH:mm" }}<br />
     {{ event.title }} - {{ event.details }}
   </div>
   <br />

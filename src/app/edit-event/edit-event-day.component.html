@@ -11,60 +11,69 @@
           >Ganztag-Event</mat-checkbox
         >
       </section>
-      <div *ngIf="!event.allDay">
-        <mat-form-field class="example-full-width">
-          <mat-label>Start</mat-label>
-          <input
-            matInput
-            type="datetime-local"
-            placeholder="Start"
-            [ngModel]="event.startDatetime | date: dateFormat"
-            (ngModelChange)="startDateChanged($event)"
-            name="start"
-          />
-        </mat-form-field>
-        <mat-form-field class="example-full-width">
-          <mat-label>Ende</mat-label>
-          <input
-            matInput
-            type="datetime-local"
-            placeholder="Ende"
-            [ngModel]="event.endDatetime | date: dateFormat"
-            (ngModelChange)="endDateChanged($event)"
-            name="ende"
-          />
-        </mat-form-field>
-        <p class="alert-text" *ngIf="showHint">
-          Wenn sich bei einem wiederholenden Event das Datum ändert, kann nur
-          dieses Event und nicht die ganze Reihe wiederholender Events
-          bearbeitet werden! (nur Uhrzeit!)
-        </p>
-      </div>
-      <div *ngIf="event.allDay">
-        <mat-form-field appearance="fill">
-          <mat-label>Zeitraum eingeben</mat-label>
-          <mat-date-range-input [rangePicker]="picker">
+      @if (!event.allDay) {
+        <div>
+          <mat-form-field class="example-full-width">
+            <mat-label>Start</mat-label>
             <input
-              matStartDate
-              [(ngModel)]="event.startDatetime"
-              placeholder="Start Datum"
-              name="allDayStart"
+              matInput
+              type="datetime-local"
+              placeholder="Start"
+              [ngModel]="event.startDatetime.toJSDate() | date: dateFormat"
+              (ngModelChange)="startDateChanged($event)"
+              (click)="$event.target.showPicker()"
+              name="start"
             />
+          </mat-form-field>
+          <mat-form-field class="example-full-width">
+            <mat-label>Ende</mat-label>
             <input
-              matEndDate
-              [(ngModel)]="event.endDatetime"
-              placeholder="Ende Datum"
-              name="allDayEnd"
+              matInput
+              type="datetime-local"
+              placeholder="Ende"
+              [ngModel]="event.endDatetime.toJSDate() | date: dateFormat"
+              (ngModelChange)="endDateChanged($event)"
+              (click)="$event.target.showPicker()"
+              name="ende"
             />
-          </mat-date-range-input>
-          <mat-hint>MM.DD.YYYY – MM.DD.YYYY</mat-hint>
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="picker"
-          ></mat-datepicker-toggle>
-          <mat-date-range-picker #picker></mat-date-range-picker>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+          @if (showHint) {
+            <p class="alert-text">
+              Wenn sich bei einem wiederholenden Event das Datum ändert, kann nur
+              dieses Event und nicht die ganze Reihe wiederholender Events
+              bearbeitet werden! (nur Uhrzeit!)
+            </p>
+          }
+        </div>
+      } @else {
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Zeitraum eingeben</mat-label>
+            <mat-date-range-input [rangePicker]="picker">
+              <input
+                matStartDate
+                [(ngModel)]="event.startDatetime"
+                placeholder="Start Datum"
+                (click)="picker.open()"
+                name="allDayStart"
+              />
+              <input
+                matEndDate
+                [(ngModel)]="event.endDatetime"
+                placeholder="Ende Datum"
+                (click)="picker.open()"
+                name="allDayEnd"
+              />
+            </mat-date-range-input>
+            <mat-hint>MM.DD.YYYY – MM.DD.YYYY</mat-hint>
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+          </mat-form-field>
+        </div>
+      }
       <section class="example-section">
         <mat-checkbox
           class="example-margin"
@@ -74,19 +83,21 @@
           >Wiederholt sich?</mat-checkbox
         >
       </section>
-      <div *ngIf="event.repeats || event.baseId">
-        <p>
-          Dieser Termin ist ein wiederholender Termin. Es können nicht alle
-          Parameter bearbeitet werden. Falls nötig Termin löschen und neu
-          anlegen!
-        </p>
-        <section>
-          <mat-form-field class="example-full-width" appearance="fill">
-            <mat-label>Wiederholen bis</mat-label>
+      @if (event.repeats || event.baseId) {
+        <div>
+          <p>
+            Dieser Termin ist ein wiederholender Termin. Es können nicht alle
+            Parameter bearbeitet werden. Falls nötig Termin löschen und neu
+            anlegen!
+          </p>
+          <section>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>Wiederholen bis</mat-label>
             <input
               matInput
               [matDatepicker]="picker2"
               [(ngModel)]="event.repeatsEndDate"
+              (click)="picker2.open()"
               name="repeatend"
               disabled="true"
             />
@@ -95,28 +106,29 @@
               matSuffix
               [for]="picker2"
             ></mat-datepicker-toggle>
-            <mat-datepicker #picker2></mat-datepicker>
-          </mat-form-field>
-        </section>
-        <mat-label>Wochentage</mat-label>
-        <mat-chip-listbox
-          #chipList
-          aria-label="Wochentage"
-          multiple
-          selectable
-          name="weekdays"
-          disabled="true"
-        >
-          <mat-chip
-            *ngFor="let day of weekdays"
-            (click)="toggleSelection(day)"
-            [selected]="event.customDays.indexOf(day) > -1"
-            [value]="day"
+              <mat-datepicker #picker2></mat-datepicker>
+            </mat-form-field>
+          </section>
+          <mat-label>Wochentage</mat-label>
+          <mat-chip-listbox
+            #chipList
+            aria-label="Wochentage"
+            multiple
+            selectable
+            name="weekdays"
+            disabled="true"
           >
-            {{ day }}
-          </mat-chip>
-        </mat-chip-listbox>
-      </div>
+            <mat-chip
+              *ngFor="let day of weekdays"
+              (click)="toggleSelection(day)"
+              [selected]="event.customDays.indexOf(day) > -1"
+              [value]="day"
+            >
+              {{ day }}
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+      }
       <mat-form-field class="example-full-width">
         <mat-label>Titel</mat-label>
         <input
@@ -156,15 +168,11 @@
   </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button
-    mat-flat-button
-    color="warn"
-    (click)="delete()"
-    mat-dialog-close
-    *ngIf="!event.isGame"
-  >
-    Löschen
-  </button>
+  @if (!event.isGame) {
+    <button mat-flat-button color="warn" (click)="delete()" mat-dialog-close>
+      Löschen
+    </button>
+  }
   <button mat-button mat-dialog-close>Abbrechen</button>
   <button mat-flat-button color="accent" (click)="apply()" cdkFocusInitial>
     Speichern

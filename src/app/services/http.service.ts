@@ -9,11 +9,12 @@ import { environment } from "src/environments/environment";
 })
 export class HttpService {
   constructor(private http: HttpClient) {
-    if (!environment.production) {
-      this.baseUrl = "http://localhost:65004/svd/";
-    } else {
-      this.baseUrl = "https://www.sv-deggenhausertal.de/";
-    }
+    // if (!environment.production) {
+    //   this.baseUrl = "http://localhost:65004/svd/";
+    // } else {
+    //   this.baseUrl = "https://www.sv-deggenhausertal.de/";
+    // }
+    this.baseUrl = "https://www.sv-deggenhausertal.de/";
     this.apiPrefix = this.baseUrl + "wp-json/";
   }
 

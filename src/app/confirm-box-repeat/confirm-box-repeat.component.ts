@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialogModule, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { DatePipe, NgIf } from "@angular/common";
+import { DatePipe } from "@angular/common";
 import { SvdEvent } from "../classes/svdEvent";
 
 @Component({
@@ -9,7 +9,7 @@ import { SvdEvent } from "../classes/svdEvent";
   templateUrl: "./confirm-box-repeat.component.html",
   styleUrls: ["./confirm-box-repeat.component.scss"],
   standalone: true,
-  imports: [DatePipe, NgIf, MatButtonModule, MatDialogModule],
+  imports: [DatePipe, MatButtonModule, MatDialogModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmBoxRepeatComponent {
